@@ -4,70 +4,125 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Unity.Entities;
+using Unity.Entities.Tests;
+
 
 namespace Tests {
-    public class SetActionTest {
 
+
+    [TestFixture]
+    //[Category("ECS Test")]
+    public class SetActionTest : ECSTestsFixture {
+        
         [Test]
-        public void GenomeTest_IndexSetGet() {
-            Genome.Allele result;
-            //Choose
-            result = SetActionSystem.SelectAction(Genome.Allele.Eat,Genome.Allele.Choose,0, 1);
-            Assert.AreEqual(result, Genome.Allele.Eat,"{0} {1} {2} {3}",Genome.Allele.Eat,Genome.Allele.Choose,0, 1);
+        public void SetActionSystemTest() {
+
+            ExperimentSetting.hour = 0;
+            var instance = m_Manager.CreateEntity();
+            m_Manager.AddComponentData(instance, new Genome {h0 = Genome.Allele.Eat});
+            m_Manager.AddComponentData(instance, new Action {Value = (Genome.Allele) Genome.Allele.Eat});
+            m_Manager.AddComponentData(instance, new FoodEnergy() {Value = 0});
+            m_Manager.AddComponentData(instance, new SleepEnergy() {Value = 0});
+            var setAction = World.CreateSystem<SetActionSystem>();
+            Genome.Allele action ;
+            Genome.Allele currAllele ;
+            Genome.Allele expected ;    
             
-            result = SetActionSystem.SelectAction(Genome.Allele.Sleep,Genome.Allele.Choose, 0, 1);
-            Assert.AreEqual(result, Genome.Allele.Eat,"{0} {1} {2} {3}",Genome.Allele.Sleep,Genome.Allele.Choose, 0, 1);
+            // test Eat & sleep Alleles in genome
+            for (int i = 0; i < 2; i++) {
+                if (i == 0) {
+                    m_Manager.SetComponentData(instance, new Genome {h0 = Genome.Allele.Eat});
+                    currAllele = Genome.Allele.Eat;
+                    expected = Genome.Allele.Eat;
+                }
+                else {
+                    m_Manager.SetComponentData(instance, new Genome {h0 = Genome.Allele.Sleep});
+                    currAllele = Genome.Allele.Sleep;
+                    expected = Genome.Allele.Sleep; 
+                }
+
+                //This also tests for prev Action == Choose which is not a valid condition 
+                // but as long this does not fail it does not cause a problem.
+                for (int prevAction = 0; prevAction < 3; prevAction++) {
+                    m_Manager.SetComponentData(instance, new Action {Value = (Genome.Allele) prevAction});
+                    for (int foodNRG = 0; foodNRG < 2; foodNRG++) {
+                        m_Manager.SetComponentData(instance, new FoodEnergy() {Value = foodNRG});
+                        for (int sleepNRG = 0; sleepNRG < 2; sleepNRG++) {
+                            m_Manager.SetComponentData(instance, new SleepEnergy() {Value = sleepNRG});
+                            setAction.Update();
+                            action = m_Manager.GetComponentData<Action>(instance).Value;
+                            Assert.AreEqual(expected, action, "{0} {1} {2} {3}", prevAction,
+                                currAllele, 0, 1);
+                        }
+                    }
+                }
+            }
+
+            Genome.Allele prevAction2;
+            // test Choose Alleles in genome
+            m_Manager.SetComponentData(instance, new Genome {h0 = Genome.Allele.Choose});
+            currAllele = Genome.Allele.Choose;
             
-            result = SetActionSystem.SelectAction(Genome.Allele.Eat,Genome.Allele.Choose, 1, 0);
-            Assert.AreEqual(result, Genome.Allele.Sleep,"{0} {1} {2} {3}",Genome.Allele.Eat,Genome.Allele.Choose, 1, 0);
+            // FoodNrg == SleepNRG
+            m_Manager.SetComponentData(instance, new FoodEnergy() {Value = 0});
+            m_Manager.SetComponentData(instance, new SleepEnergy() {Value = 0});
+            for (int i = 0; i < 2; i++) {
+                if (i == 0) {
+                    m_Manager.SetComponentData(instance, new Action() {Value = Genome.Allele.Eat});
+                    prevAction2 = Genome.Allele.Eat;
+                    expected = Genome.Allele.Eat;
+                }
+                else {
+                    m_Manager.SetComponentData(instance, new Action {Value = Genome.Allele.Sleep});
+                    prevAction2 = Genome.Allele.Sleep;
+                    expected = Genome.Allele.Sleep;
+                }
+
+                setAction.Update();
+                action = m_Manager.GetComponentData<Action>(instance).Value;
+                Assert.AreEqual(expected, action, "{0} {1} {2} {3}", prevAction2, currAllele, 0, 0);
+            }
             
-            result = SetActionSystem.SelectAction(Genome.Allele.Sleep,Genome.Allele.Choose ,1, 0);
-            Assert.AreEqual(result, Genome.Allele.Sleep,"{0} {1} {2} {3}",Genome.Allele.Sleep,Genome.Allele.Choose ,1, 0);
+            // FoodNrg > SleepNRG
+            m_Manager.SetComponentData(instance, new FoodEnergy() {Value = 1});
+            m_Manager.SetComponentData(instance, new SleepEnergy() {Value = 0});
+            for (int i = 0; i < 2; i++) {
+                if (i == 0) {
+                    m_Manager.SetComponentData(instance, new Action() {Value = Genome.Allele.Eat});
+                    prevAction2 = Genome.Allele.Eat;
+                    expected = Genome.Allele.Sleep;
+                }
+                else {
+                    m_Manager.SetComponentData(instance, new Action {Value = Genome.Allele.Sleep});
+                    prevAction2 = Genome.Allele.Sleep;
+                    expected = Genome.Allele.Sleep;
+                }
+
+                setAction.Update();
+                action = m_Manager.GetComponentData<Action>(instance).Value;
+                Assert.AreEqual(expected, action, "{0} {1} {2} {3}", prevAction2, currAllele, 1, 0);
+            }
             
-            result = SetActionSystem.SelectAction(Genome.Allele.Eat,Genome.Allele.Choose, 1, 1);
-            Assert.AreEqual(result, Genome.Allele.Eat,"{0} {1} {2} {3}",Genome.Allele.Eat,Genome.Allele.Choose ,1, 1);
-            
-            result = SetActionSystem.SelectAction(Genome.Allele.Sleep,Genome.Allele.Choose, 1, 1);
-            Assert.AreEqual(result, Genome.Allele.Sleep,"{0} {1} {2} {3}",Genome.Allele.Sleep,Genome.Allele.Choose, 1, 1);
-            
-            //Eat
-            result = SetActionSystem.SelectAction(Genome.Allele.Eat,Genome.Allele.Eat,0, 1);
-            Assert.AreEqual(result, Genome.Allele.Eat,"{0} {1} {2} {3}",Genome.Allele.Eat,Genome.Allele.Eat,0, 1);
-            
-            result = SetActionSystem.SelectAction(Genome.Allele.Sleep,Genome.Allele.Eat, 0, 1);
-            Assert.AreEqual(result, Genome.Allele.Eat,"{0} {1} {2} {3}",Genome.Allele.Sleep,Genome.Allele.Eat, 0, 1);
-            
-            result = SetActionSystem.SelectAction(Genome.Allele.Eat,Genome.Allele.Eat, 1, 0);
-            Assert.AreEqual(result, Genome.Allele.Eat,"{0} {1} {2} {3}",Genome.Allele.Eat,Genome.Allele.Eat, 1, 0);
-            
-            result = SetActionSystem.SelectAction(Genome.Allele.Sleep,Genome.Allele.Eat ,1, 0);
-            Assert.AreEqual(result, Genome.Allele.Eat,"{0} {1} {2} {3}",Genome.Allele.Sleep,Genome.Allele.Eat,1, 0);
-            
-            result = SetActionSystem.SelectAction(Genome.Allele.Eat,Genome.Allele.Eat, 1, 1);
-            Assert.AreEqual(result, Genome.Allele.Eat,"{0} {1} {2} {3}",Genome.Allele.Eat,Genome.Allele.Eat ,1, 1);
-            
-            result = SetActionSystem.SelectAction(Genome.Allele.Sleep,Genome.Allele.Eat, 1, 1);
-            Assert.AreEqual(result, Genome.Allele.Eat,"{0} {1} {2} {3}",Genome.Allele.Sleep,Genome.Allele.Eat, 1, 1);
- 
-            //Sleep
-            result = SetActionSystem.SelectAction(Genome.Allele.Eat,Genome.Allele.Sleep,0, 1);
-            Assert.AreEqual(result, Genome.Allele.Sleep,"{0} {1} {2} {3}",Genome.Allele.Eat,Genome.Allele.Sleep,0, 1);
-            
-            result = SetActionSystem.SelectAction(Genome.Allele.Sleep,Genome.Allele.Sleep, 0, 1);
-            Assert.AreEqual(result, Genome.Allele.Sleep,"{0} {1} {2} {3}",Genome.Allele.Sleep,Genome.Allele.Sleep, 0, 1);
-            
-            result = SetActionSystem.SelectAction(Genome.Allele.Eat,Genome.Allele.Sleep, 1, 0);
-            Assert.AreEqual(result, Genome.Allele.Sleep,"{0} {1} {2} {3}",Genome.Allele.Eat,Genome.Allele.Sleep, 1, 0);
-            
-            result = SetActionSystem.SelectAction(Genome.Allele.Sleep,Genome.Allele.Sleep ,1, 0);
-            Assert.AreEqual(result, Genome.Allele.Sleep,"{0} {1} {2} {3}",Genome.Allele.Sleep,Genome.Allele.Sleep,1, 0);
-            
-            result = SetActionSystem.SelectAction(Genome.Allele.Eat,Genome.Allele.Sleep, 1, 1);
-            Assert.AreEqual(result, Genome.Allele.Sleep,"{0} {1} {2} {3}",Genome.Allele.Eat,Genome.Allele.Sleep ,1, 1);
-            
-            result = SetActionSystem.SelectAction(Genome.Allele.Sleep,Genome.Allele.Sleep, 1, 1);
-            Assert.AreEqual(result, Genome.Allele.Sleep,"{0} {1} {2} {3}",Genome.Allele.Sleep,Genome.Allele.Sleep, 1, 1);
-            
+            // FoodNrg < SleepNRG
+            m_Manager.SetComponentData(instance, new FoodEnergy() {Value = 0});
+            m_Manager.SetComponentData(instance, new SleepEnergy() {Value = 1});
+            for (int i = 0; i < 2; i++) {
+                if (i == 0) {
+                    m_Manager.SetComponentData(instance, new Action() {Value = Genome.Allele.Eat});
+                    prevAction2 = Genome.Allele.Eat;
+                    expected = Genome.Allele.Eat;
+                }
+                else {
+                    m_Manager.SetComponentData(instance, new Action {Value = Genome.Allele.Sleep});
+                    prevAction2 = Genome.Allele.Sleep;
+                    expected = Genome.Allele.Eat;
+                }
+
+                setAction.Update();
+                action = m_Manager.GetComponentData<Action>(instance).Value;
+                Assert.AreEqual(expected, action, "{0} {1} {2} {3}", prevAction2, currAllele, 0, 1);
+            }
         }
     }
 }

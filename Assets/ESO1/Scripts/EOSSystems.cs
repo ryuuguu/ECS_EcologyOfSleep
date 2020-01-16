@@ -47,8 +47,8 @@ public class SetActionSystem : JobComponentSystem {
         
         public void Execute(ref Action action, [ReadOnly] ref Genome genome, [ReadOnly] ref FoodEnergy foodEnergy,
             [ReadOnly] ref SleepEnergy sleepEnergy) {
-            
-            
+            action = new Action(){Value = SelectAction(action.Value,genome[hour],
+                foodEnergy.Value, sleepEnergy.Value)};
         }
     }
 

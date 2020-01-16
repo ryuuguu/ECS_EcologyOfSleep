@@ -4,7 +4,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "EOS",
-        "Unity.Entities"
+        "Unity.Entities",
+        "Unity.Entities.Tests"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
