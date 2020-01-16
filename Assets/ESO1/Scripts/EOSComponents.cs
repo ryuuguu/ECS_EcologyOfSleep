@@ -92,3 +92,6 @@ public struct Genome  : IComponentData {
 }
 
 
+public struct Action : IComponentData {
+    public Genome.Allele Value;
+}

@@ -3,7 +3,8 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "EOS"
+        "EOS",
+        "Unity.Entities"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
