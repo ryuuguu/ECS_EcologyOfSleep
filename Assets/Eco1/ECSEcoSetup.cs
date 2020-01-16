@@ -47,7 +47,7 @@ public class ECSEcoSetup : MonoBehaviour {
             var instance = entityManager.CreateEntity();
             var pos = random.NextFloat2();
             entityManager.AddComponentData(instance, new PosXY() {Value =pos});
-            entityManager.AddComponentData(instance, new Energy {Value =0});
+            entityManager.AddComponentData(instance, new FoodEnergy {Value =0});
             entityManager.AddComponentData(instance, new GrowSpeed {Value =0.5f });
             
             var rect = new float4();

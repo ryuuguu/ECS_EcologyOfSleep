@@ -37,7 +37,7 @@ public class UpdateCellEnergyAutotrophSystem : JobComponentSystem {
     protected override void OnCreate() {
         // Cached access to a set of ComponentData based on a specific query
         m_Group = GetEntityQuery(ComponentType.ReadOnly<GrowSpeed>(),
-            ComponentType.ReadWrite<Energy>(),
+            ComponentType.ReadWrite<FoodEnergy>(),
             ComponentType.ChunkComponent<CellEnergyChunk>()
         );
     }
@@ -46,7 +46,7 @@ public class UpdateCellEnergyAutotrophSystem : JobComponentSystem {
         
         [ReadOnly]public ArchetypeChunkComponentType<GrowSpeed> GrowSpeedType;
         public ArchetypeChunkComponentType<CellEnergyChunk> CellEnergyChunkType;
-        public ArchetypeChunkComponentType<Energy>EnergyType;
+        public ArchetypeChunkComponentType<FoodEnergy>EnergyType;
         
         public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex) {
             
@@ -57,7 +57,7 @@ public class UpdateCellEnergyAutotrophSystem : JobComponentSystem {
                
                 var current = chunk.GetChunkComponentData(CellEnergyChunkType).Value;
                 
-                chunkEnergys[i] = new Energy() {Value = chunkEnergys[i].Value + chunkGrowSpeeds[i].Value};
+                chunkEnergys[i] = new FoodEnergy() {Value = chunkEnergys[i].Value + chunkGrowSpeeds[i].Value};
                 
                 chunk.SetChunkComponentData(CellEnergyChunkType,
                   new CellEnergyChunk(){Value = current + chunkGrowSpeeds[i].Value 
@@ -70,7 +70,7 @@ public class UpdateCellEnergyAutotrophSystem : JobComponentSystem {
     protected override JobHandle OnUpdate(JobHandle inputDependencies) {
         
         var growSpeedType = GetArchetypeChunkComponentType<GrowSpeed>(true);
-        var energyType = GetArchetypeChunkComponentType<Energy>(false);
+        var energyType = GetArchetypeChunkComponentType<FoodEnergy>(false);
         var cellEnergyChunkType = GetArchetypeChunkComponentType<CellEnergyChunk>();
 
         var job = new CellEnergyJob() {
