@@ -11,22 +11,23 @@ namespace Tests {
         public void GenomeTest_IndexSetGet() {
             var genome = new Genome();
             for (int i = 0; i < 24; i++) {
-                genome[i] = i;
-                Assert.AreEqual(genome[i], i);
+                
+                genome[i] = Genome.Allele.Eat;
+                Assert.AreEqual(genome[i], Genome.Allele.Eat);
             }
         }
 
         [Test]
         public void GenomeTest_IndexSetOutOfRange() {
             var genome = new Genome();
-            Assert.That(()=> genome[24] = 1, Throws.ArgumentException);
+            Assert.That(()=> genome[24] = Genome.Allele.Eat, Throws.ArgumentException);
         }
         
         
         [Test]
         public void GenomeTest_IndexGetOutOfRange() {
             var genome = new Genome();
-            Assert.That(()=> genome[24] > 1, Throws.ArgumentException);
+            Assert.That(()=> genome[24] != Genome.Allele.Eat, Throws.ArgumentException);
         }
 
         /*

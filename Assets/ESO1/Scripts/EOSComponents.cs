@@ -37,33 +37,33 @@ public struct Speed : IComponentData {
 
 [System.Serializable]
 public struct Genome  : IComponentData {
-    public float h0;
-    public float h1;
-    public float h2;
-    public float h3;
-    public float h4;
-    public float h5;
-    public float h6;
-    public float h7;
-    public float h8;
-    public float h9;
-    public float h10;
-    public float h11;
-    public float h12;
-    public float h13;
-    public float h14;
-    public float h15;
-    public float h16;
-    public float h17;
-    public float h18;
-    public float h19;
-    public float h20;
-    public float h21;
-    public float h22;
-    public float h23;
+    public Allele h0;
+    public Allele h1;
+    public Allele h2;
+    public Allele h3;
+    public Allele h4;
+    public Allele h5;
+    public Allele h6;
+    public Allele h7;
+    public Allele h8;
+    public Allele h9;
+    public Allele h10;
+    public Allele h11;
+    public Allele h12;
+    public Allele h13;
+    public Allele h14;
+    public Allele h15;
+    public Allele h16;
+    public Allele h17;
+    public Allele h18;
+    public Allele h19;
+    public Allele h20;
+    public Allele h21;
+    public Allele h22;
+    public Allele h23;
     
     /// <summary>Returns the float element at a specified index.</summary>
-    unsafe public float this[int index]
+    unsafe public Allele this[int index]
     {
         get
         {
@@ -71,7 +71,7 @@ public struct Genome  : IComponentData {
             if ((uint)index >= 24)
                 throw new System.ArgumentException("get index must be between[0...23] was "+ index );
 #endif
-            fixed (Genome* array = &this) { return ((float*)array)[index]; }
+            fixed (Genome* array = &this) { return ((Allele*)array)[index]; }
         }
         set
         {
@@ -79,9 +79,16 @@ public struct Genome  : IComponentData {
             if ((uint)index >= 24)
                 throw new System.ArgumentException("set index must be between[0...23] was " + index);
 #endif
-            fixed (float* array = &h0) { array[index] = value; }
+            fixed (Allele* array = &h0) { array[index] = value; }
         }
     }
 
+    public enum Allele {
+        Sleep,
+        Eat,
+        Choose
+    }
+    
 }
+
 
