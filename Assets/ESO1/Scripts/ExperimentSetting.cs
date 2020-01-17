@@ -39,7 +39,7 @@ public class ExperimentSetting : MonoBehaviour {
                 var patch = em.CreateEntity();
                 em.AddComponentData(patch, new PosXY() {Value = new float2(x, y)});
                 em.AddComponentData(patch, new SleepArea() {Value = false});
-                em.AddComponentData(patch, new FoodArea() {Value = 0});
+                em.AddComponentData(patch, new FoodArea() {Value = 3});
                 patches[i, j] = patch;
             }
         }
@@ -57,10 +57,7 @@ public class ExperimentSetting : MonoBehaviour {
         em.AddComponentData(agent, new Speed() {Value = speed});
         uint seed = random.NextUInt();
         seed = seed == 0 ? 1: seed ;
-        em.AddComponentData(agent, new Facing() {Value = 0
-            //, random = new Random(seed)
-            
-        });
+        em.AddComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
         em.AddComponentData(agent, new Action());
         return agent;
     }

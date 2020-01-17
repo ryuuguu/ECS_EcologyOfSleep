@@ -102,21 +102,20 @@ public class ExecuteActionSystem : JobComponentSystem {
             ref SleepEnergy sleepEnergy,ref PosXY posXY, ref Facing facing, [ReadOnly] ref Action action, 
              [ReadOnly] ref Patch patch) {
 
-            float eatAmount = math.select(0, 1,
+            float eatAmount = math.select(0f, 1f,
                 (action.Value == Genome.Allele.Eat) && (foodAreaLookup[patch.Value].Value > 0));
             foodEnergy.Value += eatAmount * eatMultiplier;
-            foodEnergy.Value -= 1 - eatAmount; // if not eating -1 food
+            foodEnergy.Value -= 1f - eatAmount; // if not eating -1 food
              
-            float sleepAmount = math.select(-1, 1,
+            float sleepAmount = math.select(-1f, 1f,
                 (action.Value == Genome.Allele.Sleep) && sleepAreaLookup[patch.Value].Value);
-            sleepEnergy.Value += sleepAmount; // if not sleeping -1 sleep
+            sleepEnergy.Value = sleepAmount; // if not sleeping -1 sleep
             
-            var move = ((action.Value == Genome.Allele.Sleep) && !sleepAreaLookup[patch.Value].Value) || 
-            ((action.Value == Genome.Allele.Eat) && (foodAreaLookup[patch.Value].Value <= 0)) ;
+            var move = ((sleepAmount <= 0) &&   (eatAmount <= 0)) ;
 
             if (move) {
-               // var flipTurn = facing.random.NextUInt(0, 2) == 0 ? -1f : 1f;
-               var flipTurn = 0;
+               var flipTurn = facing.random.NextUInt(0, 2) == 0 ? -1f : 1f;
+               
                 facing.Value += flipTurn * turnAngle;
                 var delta = new float2(math.cos(facing.Value), math.sin(facing.Value));
                 posXY.Value += delta;
@@ -137,7 +136,7 @@ public class ExecuteActionSystem : JobComponentSystem {
 
                 facing.Value = math.select(facing.Value, facing.Value += math.PI, flipAngle);
 
-                facing.Value %= 2 * math.PI;
+                facing.Value %= 2f * math.PI;
             }
             
             if (eatAmount != 0) {

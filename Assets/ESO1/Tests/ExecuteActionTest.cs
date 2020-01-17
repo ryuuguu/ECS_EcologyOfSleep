@@ -7,6 +7,7 @@ using UnityEngine.TestTools;
 using Unity.Entities;
 using Unity.Entities.Tests;
 using Unity.Mathematics;
+using Random = Unity.Mathematics.Random;
 
 namespace Tests {
 
@@ -35,7 +36,6 @@ namespace Tests {
             experimentSetting.SetRandomSeed(1);
             experimentSetting.SetupPatches(3, 3);
             agent = experimentSetting.SetupAgent(new float2(1.5f, 1.5f));
-            
         }
 
         [TearDown]
@@ -49,12 +49,15 @@ namespace Tests {
             // set up eat as first action and test for correct results 
             var centerPatch = ExperimentSetting.patches[1, 1];
             m_Manager.SetComponentData(centerPatch, new FoodArea(){Value = 2});
+            m_Manager.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
+            m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
             World.CreateSystem<ExecuteActionSystem>().Update();
-            Assert.AreEqual(-1, m_Manager.GetComponentData<SleepEnergy>(agent).Value);
-            //sleep -1
-            //eat 3
-            // action = eat 
-            // 
+            var agentPatch = m_Manager.GetComponentData<Patch>(agent).Value;
+            Assert.AreEqual(-1, m_Manager.GetComponentData<SleepEnergy>(agent).Value,"SleepEnergy");
+            Assert.AreEqual(3, m_Manager.GetComponentData<FoodEnergy>(agent).Value,"FoodEnergy");
+            Assert.AreEqual(0, m_Manager.GetComponentData<Facing>(agent).Value,"Facing");
+            Assert.AreEqual(new float2(1.5f, 1.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");
+
         }
     }
 }
