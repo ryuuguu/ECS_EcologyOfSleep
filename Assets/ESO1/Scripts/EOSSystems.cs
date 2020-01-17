@@ -79,8 +79,9 @@ public class ExecuteActionSystem : JobComponentSystem {
         m_Group = GetEntityQuery(
             ComponentType.ReadWrite<FoodEnergy>(),
             ComponentType.ReadWrite<SleepEnergy>(),
+            ComponentType.ReadWrite<PosXY>(),
+            ComponentType.ReadWrite<Facing>(),
             ComponentType.ReadOnly<Action>(),
-            ComponentType.ReadOnly<PosXY>(),
             ComponentType.ReadOnly<Patch>()
         );
         m_EndSimulationEcbSystem = World
@@ -100,20 +101,22 @@ public class ExecuteActionSystem : JobComponentSystem {
         public void Execute(Entity entity, int entityInQueryIndex, ref FoodEnergy foodEnergy,
             ref SleepEnergy sleepEnergy,ref PosXY posXY, ref Facing facing, [ReadOnly] ref Action action, 
              [ReadOnly] ref Patch patch) {
-            
-            
+
             float eatAmount = math.select(0, 1,
                 (action.Value == Genome.Allele.Eat) && (foodAreaLookup[patch.Value].Value > 0));
             foodEnergy.Value += eatAmount * eatMultiplier;
-            float sleepAmount = math.select(0, -1,
+            foodEnergy.Value -= 1 - eatAmount; // if not eating -1 food
+             
+            float sleepAmount = math.select(-1, 1,
                 (action.Value == Genome.Allele.Sleep) && sleepAreaLookup[patch.Value].Value);
-            sleepEnergy.Value += sleepAmount;
+            sleepEnergy.Value += sleepAmount; // if not sleeping -1 sleep
             
             var move = ((action.Value == Genome.Allele.Sleep) && !sleepAreaLookup[patch.Value].Value) || 
             ((action.Value == Genome.Allele.Eat) && (foodAreaLookup[patch.Value].Value <= 0)) ;
 
             if (move) {
-                var flipTurn = facing.random.NextUInt(0, 2) == 0 ? -1f : 1f;
+               // var flipTurn = facing.random.NextUInt(0, 2) == 0 ? -1f : 1f;
+               var flipTurn = 0;
                 facing.Value += flipTurn * turnAngle;
                 var delta = new float2(math.cos(facing.Value), math.sin(facing.Value));
                 posXY.Value += delta;
@@ -152,7 +155,8 @@ public class ExecuteActionSystem : JobComponentSystem {
            sleepAreaLookup = sleepAreas,
            foodAreaLookup = foodAreas,
            ecb = ecb,
-           eatMultiplier = ExperimentSetting.eatMultiplier
+           eatMultiplier = ExperimentSetting.eatMultiplier,
+           turnAngle = ExperimentSetting.turnAngleRadian
         }; 
         var jobHandle = job.Schedule(m_Group, inputDependencies);
         m_EndSimulationEcbSystem.AddJobHandleForProducer(jobHandle);

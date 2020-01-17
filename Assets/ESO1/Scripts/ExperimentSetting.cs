@@ -16,7 +16,7 @@ public class ExperimentSetting : MonoBehaviour {
 
     public float speed;
     public static float eatMultiplier = 3;
-    public static float turnAngleRadian;
+    public static float turnAngleRadian= 1;
     public static Random random; // This Random will set seeds for all other Randoms used
     
     [NonSerialized]
@@ -27,7 +27,7 @@ public class ExperimentSetting : MonoBehaviour {
     /// 0 is changed to 1
     /// </summary>
     /// <param name="seed"></param>
-    public void RandomSeed(uint seed) {
+    public void SetRandomSeed(uint seed) {
         seed = seed == 0 ? 1: seed ;
         random = new  Random(seed);
     }
@@ -40,12 +40,13 @@ public class ExperimentSetting : MonoBehaviour {
                 em.AddComponentData(patch, new PosXY() {Value = new float2(x, y)});
                 em.AddComponentData(patch, new SleepArea() {Value = false});
                 em.AddComponentData(patch, new FoodArea() {Value = 0});
+                patches[i, j] = patch;
             }
         }
 
     }
 
-    public void SetupAgent(float2 startXY) {
+    public Entity SetupAgent(float2 startXY) {
         var agent = em.CreateEntity();
         em.AddComponentData(agent, new PosXY(){Value = startXY});
         em.AddComponentData(agent, new FoodEnergy() {Value = 0});
@@ -56,7 +57,12 @@ public class ExperimentSetting : MonoBehaviour {
         em.AddComponentData(agent, new Speed() {Value = speed});
         uint seed = random.NextUInt();
         seed = seed == 0 ? 1: seed ;
-        em.AddComponentData(agent, new Facing() {Value = 0, random = new Random(seed)});
+        em.AddComponentData(agent, new Facing() {Value = 0
+            //, random = new Random(seed)
+            
+        });
+        em.AddComponentData(agent, new Action());
+        return agent;
     }
     
     

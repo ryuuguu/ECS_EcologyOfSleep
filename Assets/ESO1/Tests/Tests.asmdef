@@ -5,7 +5,8 @@
         "UnityEditor.TestRunner",
         "EOS",
         "Unity.Entities",
-        "Unity.Entities.Tests"
+        "Unity.Entities.Tests",
+        "Unity.Mathematics"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

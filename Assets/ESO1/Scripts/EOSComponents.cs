@@ -42,7 +42,7 @@ public struct AdjustFoodArea : IComponentData {
 /// </summary>
 public struct Facing : IComponentData {
     public float Value;
-    public Random random;
+    //public Random random;
 }
 
 public struct Speed : IComponentData {
