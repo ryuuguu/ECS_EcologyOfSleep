@@ -388,16 +388,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1678352932}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6476bbb2b348c4638aecd6eb095f5664, type: 3}
+  m_Script: {fileID: 11500000, guid: e7c1a91bac4994998a4dcaf941e99d77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  size: {x: 2, y: 2}
-  worldSize: 10
-  holder: {fileID: 0}
-  prefabCell: {fileID: 0}
-  _offset: {x: 0, y: 0}
-  _scale: {x: 0, y: 0}
-  zDeadSetter: 0
+  speed: 1
 --- !u!4 &1678352934
 Transform:
   m_ObjectHideFlags: 0

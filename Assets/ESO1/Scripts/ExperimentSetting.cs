@@ -22,6 +22,35 @@ public class ExperimentSetting : MonoBehaviour {
     [NonSerialized]
     public EntityManager em;
 
+    private Entity agent;
+
+    private void Start() {
+       // Test();
+    }
+
+    public void Test() {
+        
+        hour = 0;
+        turnAngleRadian = math.PI / 2f; //90º
+        eatMultiplier = 3;
+        var go = new GameObject("ExperimentSetting");
+        em  = World.DefaultGameObjectInjectionWorld.EntityManager;
+        SetRandomSeed(1);
+        SetupPatches(3, 3);
+        agent = SetupAgent(new float2(1.5f, 1.5f));
+        var centerPatch =patches[1, 1];
+        em.SetComponentData(centerPatch, new FoodArea(){Value = 2});
+        em.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
+        em.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
+        
+        var agentPatch = em.GetComponentData<Patch>(agent).Value;
+       
+        Debug.Log(em.HasComponent<AdjustFoodArea>(centerPatch));
+        
+      
+        
+    }
+    
     /// <summary>
     /// Set master Random seed
     /// 0 is changed to 1

@@ -82,7 +82,13 @@ namespace Tests {
              Assert.AreEqual(3, m_Manager.GetComponentData<FoodEnergy>(agent).Value,"FoodEnergy");
              Assert.AreEqual(0, m_Manager.GetComponentData<Facing>(agent).Value,"Facing");
              Assert.AreEqual(new float2(1.5f, 1.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");
-         }
+             var endSimulationEcbSystem = World
+                 .GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+             Assert.IsFalse( m_Manager.HasComponent<AdjustFoodArea>(centerPatch));
+             endSimulationEcbSystem.Update();
+             Assert.IsTrue( m_Manager.HasComponent<AdjustFoodArea>(centerPatch));
+             
+        }
         
         
         [Test]

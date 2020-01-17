@@ -140,7 +140,7 @@ public class ExecuteActionSystem : JobComponentSystem {
             }
             
             if (eatAmount != 0) {
-                ecb.SetComponent(entityInQueryIndex,patch.Value,new AdjustFoodArea(){Value = -1*eatAmount});
+                ecb.AddComponent(entityInQueryIndex,patch.Value,new AdjustFoodArea(){Value = -1*eatAmount});
             }
         }
     }
