@@ -120,19 +120,19 @@ public class ExecuteActionSystem : JobComponentSystem {
                 var delta = new float2(math.cos(facing.Value), math.sin(facing.Value));
                 posXY.Value += delta;
                 bool flipAngle = false;
-                posXY.Value.x = math.select(posXY.Value.x, posXY.Value.x * -1, posXY.Value.x < 0);
                 flipAngle = posXY.Value.x < 0;
-
+                posXY.Value.x = math.select(posXY.Value.x, posXY.Value.x * -1, posXY.Value.x < 0);
+                
+                flipAngle = flipAngle || posXY.Value.y < 0;
                 posXY.Value.y = math.select(posXY.Value.y, posXY.Value.y * -1, posXY.Value.y < 0);
-                flipAngle = posXY.Value.y < 0;
-
+                
+                flipAngle = flipAngle || posXY.Value.x > PosXY.bounds.x;
                 posXY.Value.x = math.select(posXY.Value.x, 2 * PosXY.bounds.x - posXY.Value.x,
                     posXY.Value.x > PosXY.bounds.x);
-                flipAngle = posXY.Value.x > PosXY.bounds.x;
-
+                
+                flipAngle = flipAngle || posXY.Value.y > PosXY.bounds.y;
                 posXY.Value.y = math.select(posXY.Value.y, 2 * PosXY.bounds.y - posXY.Value.y,
                     posXY.Value.y > PosXY.bounds.y);
-                flipAngle = posXY.Value.y > PosXY.bounds.y;
 
                 facing.Value = math.select(facing.Value, facing.Value += math.PI, flipAngle);
 

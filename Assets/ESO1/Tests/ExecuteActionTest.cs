@@ -87,7 +87,7 @@ namespace Tests {
         
         [Test]
         public void ExecuteActionSystem_SleepTest() {
-            // set up eat as first action and test for correct results 
+            // set up sleep as first action and test for correct results 
             var centerPatch = ExperimentSetting.patches[1, 1];
             m_Manager.SetComponentData(centerPatch, new SleepArea(){Value = true});
             m_Manager.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
@@ -102,7 +102,7 @@ namespace Tests {
         
         [Test]
         public void ExecuteActionSystem_CantSleepTest() {
-            // set up eat as first action and test for correct results 
+            // set up sleep as first action and test for correct results 
             var centerPatch = ExperimentSetting.patches[1, 1];
             m_Manager.SetComponentData(centerPatch, new SleepArea(){Value = false});
             m_Manager.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
@@ -114,5 +114,53 @@ namespace Tests {
             Assert.AreEqual(ExperimentSetting.turnAngleRadian*-1f, m_Manager.GetComponentData<Facing>(agent).Value,"Facing");
             Assert.AreEqual(new float2(1.5f, 0.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");
         }
+        
+        [Test]
+        public void ExecuteActionSystem_BounceY0Test() {
+            agent = experimentSetting.SetupAgent(new float2(1.5f, 0.5f));
+            m_Manager.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
+            m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
+            World.CreateSystem<ExecuteActionSystem>().Update();
+            var agentPatch = m_Manager.GetComponentData<Patch>(agent).Value;
+            Assert.AreEqual(ExperimentSetting.turnAngleRadian, m_Manager.GetComponentData<Facing>(agent).Value,"Facing");
+            Assert.AreEqual(new float2(1.5f, 0.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");
+            
+        }
+        
+        [Test]
+        public void ExecuteActionSystem_BounceY2Test() {
+            agent = experimentSetting.SetupAgent(new float2(1.5f, 2.5f));
+            m_Manager.SetComponentData(agent, new Facing() {Value = math.PI, random = new Random(1)});
+            m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
+            World.CreateSystem<ExecuteActionSystem>().Update();
+            var agentPatch = m_Manager.GetComponentData<Patch>(agent).Value;
+            Assert.AreEqual(ExperimentSetting.turnAngleRadian*3, m_Manager.GetComponentData<Facing>(agent).Value,"Facing");
+            Assert.AreEqual(new float2(1.5f, 2.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");
+            
+        }
+        
+        [Test]
+        public void ExecuteActionSystem_BounceX2Test() {
+            agent = experimentSetting.SetupAgent(new float2(2.5f, 1.5f));
+            m_Manager.SetComponentData(agent, new Facing() {Value = math.PI/2f, random = new Random(1)});
+            m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
+            World.CreateSystem<ExecuteActionSystem>().Update();
+            var agentPatch = m_Manager.GetComponentData<Patch>(agent).Value;
+            Assert.AreEqual(math.PI, m_Manager.GetComponentData<Facing>(agent).Value,"Facing");
+            Assert.AreEqual(new float2(2.5f, 1.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");
+        }
+        
+        [Test]
+        public void ExecuteActionSystem_BounceX0Test() {
+            agent = experimentSetting.SetupAgent(new float2(0.5f, 1.5f));
+            m_Manager.SetComponentData(agent, new Facing() {Value = -1*math.PI/2f, random = new Random(1)});
+            m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
+            World.CreateSystem<ExecuteActionSystem>().Update();
+            var agentPatch = m_Manager.GetComponentData<Patch>(agent).Value;
+            Assert.AreEqual(0, m_Manager.GetComponentData<Facing>(agent).Value,"Facing");
+            Assert.AreEqual(0.5f, m_Manager.GetComponentData<PosXY>(agent).Value.x,0.0001,"PosXY.x ");
+            Assert.AreEqual(1.5f, m_Manager.GetComponentData<PosXY>(agent).Value.y,0.0001,"PosXY.y");
+        }
+        
     }
 }
