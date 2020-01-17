@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Entities;
 using Unity.Mathematics;
+using Random = Unity.Mathematics.Random;
 
 public struct FoodEnergy : IComponentData {
     public float Value;
@@ -15,12 +16,24 @@ public struct SleepEnergy : IComponentData {
 
 public struct PosXY : IComponentData {
     public float2 Value;
+    
+    public static float2 bounds;
+    
 }
 
 public struct SleepArea : IComponentData {
+    public bool Value;
 }
 
 public struct FoodArea : IComponentData {
+    public float Value;
+}
+
+public struct Patch : IComponentData {
+    public Entity Value;
+}
+
+public struct AdjustFoodArea : IComponentData {
     public float Value;
 }
 
@@ -29,6 +42,7 @@ public struct FoodArea : IComponentData {
 /// </summary>
 public struct Facing : IComponentData {
     public float Value;
+    public Random random;
 }
 
 public struct Speed : IComponentData {

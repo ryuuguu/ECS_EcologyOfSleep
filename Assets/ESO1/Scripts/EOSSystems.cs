@@ -6,6 +6,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Collections;
 using UnityEditor;
+using Random = Unity.Mathematics.Random;
 
 
 /// <summary>
@@ -27,10 +28,7 @@ public class SetActionSystem : JobComponentSystem {
         prevChoice = math.select(prevChoice, (int)Genome.Allele.Sleep, sleepNRG + 0.1 < foodNRG);
         prevChoice = math.select(prevChoice, (int)Genome.Allele.Eat, currAllele == Genome.Allele.Eat);
         return (Genome.Allele) math.select(prevChoice, (int)Genome.Allele.Sleep, currAllele == Genome.Allele.Sleep);
-
-        
     }
-    
     
     protected override void OnCreate() {
         // Cached access to a set of ComponentData based on a specific query
@@ -63,6 +61,108 @@ public class SetActionSystem : JobComponentSystem {
    
 }
 
+
+/// <summary>
+/// decide attempt sleep or eat (before(Can't eat, can't sleep))
+///check genome
+///  if eat or sleep use them
+///  if choose compare energies 
+/// 
+/// </summary>
+[AlwaysSynchronizeSystem]
+[BurstCompile]
+public class ExecuteActionSystem : JobComponentSystem {
+    EntityQuery m_Group;
+    protected EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
+    protected override void OnCreate() {
+        base.OnCreate();
+        m_Group = GetEntityQuery(
+            ComponentType.ReadWrite<FoodEnergy>(),
+            ComponentType.ReadWrite<SleepEnergy>(),
+            ComponentType.ReadOnly<Action>(),
+            ComponentType.ReadOnly<PosXY>(),
+            ComponentType.ReadOnly<Patch>()
+        );
+        m_EndSimulationEcbSystem = World
+            .GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+    }
+    
+    
+    struct ExecuteActionJob : IJobForEachWithEntity< FoodEnergy,SleepEnergy,PosXY,Facing,Action,Patch> {
+
+        [ReadOnly]public ComponentDataFromEntity<SleepArea> sleepAreaLookup;
+        [ReadOnly]public ComponentDataFromEntity<FoodArea> foodAreaLookup;
+        
+        public EntityCommandBuffer.Concurrent ecb;
+
+        public float eatMultiplier;
+        public float turnAngle;
+        public void Execute(Entity entity, int entityInQueryIndex, ref FoodEnergy foodEnergy,
+            ref SleepEnergy sleepEnergy,ref PosXY posXY, ref Facing facing, [ReadOnly] ref Action action, 
+             [ReadOnly] ref Patch patch) {
+            
+            
+            float eatAmount = math.select(0, 1,
+                (action.Value == Genome.Allele.Eat) && (foodAreaLookup[patch.Value].Value > 0));
+            foodEnergy.Value += eatAmount * eatMultiplier;
+            float sleepAmount = math.select(0, -1,
+                (action.Value == Genome.Allele.Sleep) && sleepAreaLookup[patch.Value].Value);
+            sleepEnergy.Value += sleepAmount;
+            
+            var move = ((action.Value == Genome.Allele.Sleep) && !sleepAreaLookup[patch.Value].Value) || 
+            ((action.Value == Genome.Allele.Eat) && (foodAreaLookup[patch.Value].Value <= 0)) ;
+
+            if (move) {
+                var flipTurn = facing.random.NextUInt(0, 2) == 0 ? -1f : 1f;
+                facing.Value += flipTurn * turnAngle;
+                var delta = new float2(math.cos(facing.Value), math.sin(facing.Value));
+                posXY.Value += delta;
+                bool flipAngle = false;
+                posXY.Value.x = math.select(posXY.Value.x, posXY.Value.x * -1, posXY.Value.x < 0);
+                flipAngle = posXY.Value.x < 0;
+
+                posXY.Value.y = math.select(posXY.Value.y, posXY.Value.y * -1, posXY.Value.y < 0);
+                flipAngle = posXY.Value.y < 0;
+
+                posXY.Value.x = math.select(posXY.Value.x, 2 * PosXY.bounds.x - posXY.Value.x,
+                    posXY.Value.x > PosXY.bounds.x);
+                flipAngle = posXY.Value.x > PosXY.bounds.x;
+
+                posXY.Value.y = math.select(posXY.Value.y, 2 * PosXY.bounds.y - posXY.Value.y,
+                    posXY.Value.y > PosXY.bounds.y);
+                flipAngle = posXY.Value.y > PosXY.bounds.y;
+
+                facing.Value = math.select(facing.Value, facing.Value += math.PI, flipAngle);
+
+                facing.Value %= 2 * math.PI;
+            }
+            
+            if (eatAmount != 0) {
+                ecb.SetComponent(entityInQueryIndex,patch.Value,new AdjustFoodArea(){Value = -1*eatAmount});
+            }
+        }
+    }
+
+    protected override JobHandle OnUpdate(JobHandle inputDependencies) {
+        ComponentDataFromEntity<SleepArea> sleepAreas = GetComponentDataFromEntity<SleepArea>(); 
+        ComponentDataFromEntity<FoodArea> foodAreas = GetComponentDataFromEntity<FoodArea>();
+        
+        var ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().ToConcurrent();
+        var job = new ExecuteActionJob() {
+           sleepAreaLookup = sleepAreas,
+           foodAreaLookup = foodAreas,
+           ecb = ecb,
+           eatMultiplier = ExperimentSetting.eatMultiplier
+        }; 
+        var jobHandle = job.Schedule(m_Group, inputDependencies);
+        m_EndSimulationEcbSystem.AddJobHandleForProducer(jobHandle);
+        return jobHandle;
+
+
+    }
+    
+   
+}
 
 
 
