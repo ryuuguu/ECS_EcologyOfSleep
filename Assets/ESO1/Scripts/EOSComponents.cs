@@ -18,7 +18,6 @@ public struct PosXY : IComponentData {
     public float2 Value;
     
     public static float2 bounds;
-    
 }
 
 public struct SleepArea : IComponentData {

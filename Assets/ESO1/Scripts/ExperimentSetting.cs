@@ -43,7 +43,7 @@ public class ExperimentSetting : MonoBehaviour {
                 patches[i, j] = patch;
             }
         }
-
+        PosXY.bounds = new float2(x,y);
     }
 
     public Entity SetupAgent(float2 startXY) {

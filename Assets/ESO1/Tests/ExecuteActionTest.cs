@@ -18,12 +18,22 @@ namespace Tests {
 
         protected Entity agent;
         protected ExperimentSetting experimentSetting;
-
         
         
-        //ref FoodEnergy foodEnergy,
-        //ref SleepEnergy sleepEnergy,ref PosXY posXY, ref Facing facing, [ReadOnly] ref Action action, 
-        //[ReadOnly] ref Patch patch)
+        
+        /// <summary>
+        ///
+        /// This code produces randomResult = false
+        /// var testRandom = new Random(1);
+        /// var randomResult =  testRandom.NextUInt(0, 2) == 0 ? false : true;
+        ///
+        /// Adding two call to Next...()
+        /// produces randomResult = true
+        /// var testRandom = new Random(1);
+        ///testRandom.NextUInt();
+        ///testRandom.NextUInt();
+        ///var randomResult =  testRandom.NextUInt(0, 2) == 0 ? false : true; 
+        /// </summary>
         [SetUp]
         public override void Setup() {
             base.Setup();
@@ -43,21 +53,66 @@ namespace Tests {
             base.TearDown();
         }
         
-      
+        
         [Test]
-        public void ExecuteActionSystem_EatTest() {
+        public void ExecuteActionSystem_CantEatTest() {
             // set up eat as first action and test for correct results 
             var centerPatch = ExperimentSetting.patches[1, 1];
-            m_Manager.SetComponentData(centerPatch, new FoodArea(){Value = 2});
-            m_Manager.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
+            m_Manager.SetComponentData(centerPatch, new FoodArea(){Value = 0});
+            m_Manager.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
             m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
             World.CreateSystem<ExecuteActionSystem>().Update();
             var agentPatch = m_Manager.GetComponentData<Patch>(agent).Value;
             Assert.AreEqual(-1, m_Manager.GetComponentData<SleepEnergy>(agent).Value,"SleepEnergy");
-            Assert.AreEqual(3, m_Manager.GetComponentData<FoodEnergy>(agent).Value,"FoodEnergy");
+            Assert.AreEqual(-1, m_Manager.GetComponentData<FoodEnergy>(agent).Value,"FoodEnergy");
+            Assert.AreEqual(ExperimentSetting.turnAngleRadian*-1f, m_Manager.GetComponentData<Facing>(agent).Value,"Facing");
+            Assert.AreEqual(new float2(1.5f, 0.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");
+        }
+        
+        [Test]
+        public void ExecuteActionSystem_EatTest() {
+             // set up eat as first action and test for correct results 
+             var centerPatch = ExperimentSetting.patches[1, 1];
+             m_Manager.SetComponentData(centerPatch, new FoodArea(){Value = 2});
+             m_Manager.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
+             m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
+             World.CreateSystem<ExecuteActionSystem>().Update();
+             var agentPatch = m_Manager.GetComponentData<Patch>(agent).Value;
+             Assert.AreEqual(-1, m_Manager.GetComponentData<SleepEnergy>(agent).Value,"SleepEnergy");
+             Assert.AreEqual(3, m_Manager.GetComponentData<FoodEnergy>(agent).Value,"FoodEnergy");
+             Assert.AreEqual(0, m_Manager.GetComponentData<Facing>(agent).Value,"Facing");
+             Assert.AreEqual(new float2(1.5f, 1.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");
+         }
+        
+        
+        [Test]
+        public void ExecuteActionSystem_SleepTest() {
+            // set up eat as first action and test for correct results 
+            var centerPatch = ExperimentSetting.patches[1, 1];
+            m_Manager.SetComponentData(centerPatch, new SleepArea(){Value = true});
+            m_Manager.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
+            m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
+            World.CreateSystem<ExecuteActionSystem>().Update();
+            var agentPatch = m_Manager.GetComponentData<Patch>(agent).Value;
+            Assert.AreEqual(1, m_Manager.GetComponentData<SleepEnergy>(agent).Value,"SleepEnergy");
+            Assert.AreEqual(-1, m_Manager.GetComponentData<FoodEnergy>(agent).Value,"FoodEnergy");
             Assert.AreEqual(0, m_Manager.GetComponentData<Facing>(agent).Value,"Facing");
             Assert.AreEqual(new float2(1.5f, 1.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");
-
+        }
+        
+        [Test]
+        public void ExecuteActionSystem_CantSleepTest() {
+            // set up eat as first action and test for correct results 
+            var centerPatch = ExperimentSetting.patches[1, 1];
+            m_Manager.SetComponentData(centerPatch, new SleepArea(){Value = false});
+            m_Manager.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
+            m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
+            World.CreateSystem<ExecuteActionSystem>().Update();
+            var agentPatch = m_Manager.GetComponentData<Patch>(agent).Value;
+            Assert.AreEqual(-1, m_Manager.GetComponentData<SleepEnergy>(agent).Value,"SleepEnergy");
+            Assert.AreEqual(-1, m_Manager.GetComponentData<FoodEnergy>(agent).Value,"FoodEnergy");
+            Assert.AreEqual(ExperimentSetting.turnAngleRadian*-1f, m_Manager.GetComponentData<Facing>(agent).Value,"Facing");
+            Assert.AreEqual(new float2(1.5f, 0.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");
         }
     }
 }
