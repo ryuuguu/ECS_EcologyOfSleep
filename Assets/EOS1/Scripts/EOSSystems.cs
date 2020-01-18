@@ -72,9 +72,6 @@ public class AdjustFoodAreaSystem : JobComponentSystem {
 [UpdateBefore(typeof(ExecuteActionSystem))]
 public class SetActionSystem : JobComponentSystem {
     EntityQuery m_Group;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-
     protected override void OnCreate() {
         // Cached access to a set of ComponentData based on a specific query
         m_Group = GetEntityQuery(ComponentType.ReadWrite<Genome>(),
@@ -224,39 +221,19 @@ public class ExecuteActionSystem : JobComponentSystem {
 /// </summary>
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 [AlwaysSynchronizeSystem]
-[BurstCompile]
 public class DisplayAgentSystem : JobComponentSystem {
     EntityQuery m_Group;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-
-    protected override void OnCreate() {
-        // Cached access to a set of ComponentData based on a specific query
-        m_Group = GetEntityQuery(
-            ComponentType.ReadOnly<Action>(),
-            ComponentType.ReadOnly<FoodEnergy>(),
-            ComponentType.ReadOnly<SleepEnergy>(),
-            ComponentType.ReadOnly<PosXY>()
-        );
-    }
-    
-    struct DisplayAgentJob : IJobForEach<Action,FoodEnergy,SleepEnergy,PosXY> {
-        public int hour;
+    protected override JobHandle OnUpdate(JobHandle inputDeps) {
         
-        public void Execute([ReadOnly] ref Action action, [ReadOnly] ref  FoodEnergy foodEnergy,
-            [ReadOnly]ref  SleepEnergy sleepEnergy, [ReadOnly]ref PosXY posXY ) {
-            
-            
-            
-        }
-    }
-
-    protected override JobHandle OnUpdate(JobHandle inputDependencies) {
-        
-        var job = new DisplayAgentJob {
-            hour = ExperimentSetting.hour
-        };
-        return job.Run(m_Group, inputDependencies);
+         Entities
+             .WithoutBurst()
+            .ForEach((in Action action, in  FoodEnergy foodEnergy,
+             in  SleepEnergy sleepEnergy, in PosXY posXY)=> {
+                EOSGrid.SetAgent(posXY.Value,foodEnergy.Fitness(),sleepEnergy.Fitness());   
+            }).Run();
+       
+        return default;
     }
     
    

@@ -4,6 +4,8 @@ using UnityEngine;
 using Unity.Mathematics;
 
 public class EOSGrid : MonoBehaviour {
+
+    public ExperimentSetting experimentSetting;
     
     public Vector2Int size = new Vector2Int(10,10);
     public bool stressTest = false;
@@ -29,6 +31,9 @@ public class EOSGrid : MonoBehaviour {
     public void Start() {
         inst = this;
         InitDisplay();
+        agent = prefabAgent;
+        experimentSetting.DisplayTest(new int2(size.x,size.y));
+        
     }
     
     public void InitDisplay() {
@@ -61,6 +66,7 @@ public class EOSGrid : MonoBehaviour {
     }
     
     public void SetAgentInstance(float2 loc, float foodFitness, float sleepFitness) {
+        Debug.Log("SetAgentInstance "+ loc + " : " + foodFitness + " : "+ sleepFitness);
         var pos = new Vector3(loc.x * _scale.x + _offset.x, loc.y * _scale.y + _offset.y, -1);
         agent.transform.localPosition = pos;
     }
