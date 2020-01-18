@@ -9,6 +9,9 @@ using Random = Unity.Mathematics.Random;
 public class ExperimentSetting : MonoBehaviour {
 
 
+    public static int minuteMod = 60;
+    public static int hourMod = 24;
+
     public static int minute; //0~59
     public static int hour; //0~23
     public static int day; //0~6
@@ -28,6 +31,22 @@ public class ExperimentSetting : MonoBehaviour {
        // Test();
     }
 
+    public void Update() {
+        NextTick();
+    }
+
+    public static void NextTick() {
+        minute++;
+        minute %= minuteMod;
+        if (minute == 0) {
+            hour++;
+            hour %= hourMod;
+            if (hour == 0) {
+                day++;
+            }
+        }
+    }
+    
     public void Test() {
         
         hour = 0;
@@ -88,6 +107,11 @@ public class ExperimentSetting : MonoBehaviour {
         seed = seed == 0 ? 1: seed ;
         em.AddComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
         em.AddComponentData(agent, new Action());
+        var chooseGenome = new Genome();
+        for(int i= 0; i<24;i++) {
+            chooseGenome[i] = Genome.Allele.Choose;
+        };
+        em.AddComponentData(agent, chooseGenome); 
         return agent;
     }
     

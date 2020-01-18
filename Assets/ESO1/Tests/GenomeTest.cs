@@ -11,7 +11,6 @@ namespace Tests {
         public void GenomeTest_IndexSetGet() {
             var genome = new Genome();
             for (int i = 0; i < 24; i++) {
-                
                 genome[i] = Genome.Allele.Eat;
                 Assert.AreEqual(genome[i], Genome.Allele.Eat);
             }
@@ -22,7 +21,6 @@ namespace Tests {
             var genome = new Genome();
             Assert.That(()=> genome[24] = Genome.Allele.Eat, Throws.ArgumentException);
         }
-        
         
         [Test]
         public void GenomeTest_IndexGetOutOfRange() {

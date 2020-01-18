@@ -64,7 +64,11 @@ namespace Tests {
             m_Manager.SetComponentData(centerPatch, new FoodArea(){Value = 2});
             m_Manager.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
             m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
-            var agentPatch = m_Manager.GetComponentData<Patch>(agent).Value;
+            var eatGenome = new Genome();
+            for(int i= 0; i<24;i++) {
+                eatGenome[i] = Genome.Allele.Eat;
+            };
+            m_Manager.AddComponentData(agent, eatGenome); 
             
             World.CreateSystem<AdjustFoodAreaSystem>().Update();
             World.CreateSystem<SetActionSystem>().Update();
@@ -75,6 +79,8 @@ namespace Tests {
             Assert.AreEqual(2, m_Manager.GetComponentData<FoodArea>(centerPatch).Value,"FoodArea Tick 0 pre");
             // adjustFood added
             endSimulationEcbSystem.Update();
+            ExperimentSetting.NextTick();
+            
             Assert.AreEqual(-1, m_Manager.GetComponentData<AdjustFoodArea>(centerPatch).Value,"AdjustFoodArea Tick 0 post");
             Assert.IsTrue( m_Manager.HasComponent<AdjustFoodArea>(centerPatch),"Tick 0 post");
             Assert.AreEqual(3, m_Manager.GetComponentData<FoodEnergy>(agent).Value,"FoodEnergy Tick 0 post"); 
@@ -92,6 +98,7 @@ namespace Tests {
          
             // adjust food added & adjustfood removed
             endSimulationEcbSystem.Update();
+            ExperimentSetting.NextTick();
             
             Assert.IsTrue( m_Manager.HasComponent<AdjustFoodArea>(centerPatch),"Tick 1 post");
             
@@ -102,6 +109,8 @@ namespace Tests {
             
             // adjust food adjustFood removed
             endSimulationEcbSystem.Update();
+            ExperimentSetting.NextTick();
+            
             Assert.IsFalse( m_Manager.HasComponent<AdjustFoodArea>(centerPatch),"Tick 2 post");
             
         }
