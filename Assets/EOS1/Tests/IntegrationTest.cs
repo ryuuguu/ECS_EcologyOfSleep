@@ -37,7 +37,7 @@ namespace Tests {
             base.Setup();
             ExperimentSetting.hour = 0;
             ExperimentSetting.turnAngleRadian = math.PI / 2f; //90º
-            ExperimentSetting.eatMultiplier = 3;
+            ExperimentSetting.incrMultiplier = 3;
             var go = new GameObject("ExperimentSetting");
             experimentSetting = go.AddComponent<ExperimentSetting>();
             experimentSetting.em = m_Manager;

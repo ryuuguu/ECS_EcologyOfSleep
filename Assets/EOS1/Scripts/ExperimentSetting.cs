@@ -18,7 +18,7 @@ public class ExperimentSetting : MonoBehaviour {
     public static Entity[,] patches;
 
     public float speed;
-    public static float eatMultiplier = 3;
+    public static float incrMultiplier = 3;
     public static float turnAngleRadian= 1;
     public static Random random; // This Random will set seeds for all other Randoms used
     
@@ -51,7 +51,7 @@ public class ExperimentSetting : MonoBehaviour {
         
         hour = 0;
         turnAngleRadian = math.PI / 2f; //90º
-        eatMultiplier = 3;
+        incrMultiplier = 3;
         var go = new GameObject("ExperimentSetting");
         em  = World.DefaultGameObjectInjectionWorld.EntityManager;
         SetRandomSeed(1);

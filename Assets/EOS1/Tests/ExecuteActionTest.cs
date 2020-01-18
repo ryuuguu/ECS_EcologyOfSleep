@@ -39,7 +39,7 @@ namespace Tests {
             base.Setup();
             ExperimentSetting.hour = 0;
             ExperimentSetting.turnAngleRadian = math.PI / 2f; //90º
-            ExperimentSetting.eatMultiplier = 3;
+            ExperimentSetting.incrMultiplier = 3;
             var go = new GameObject("ExperimentSetting");
             experimentSetting = go.AddComponent<ExperimentSetting>();
             experimentSetting.em = m_Manager;
@@ -100,7 +100,7 @@ namespace Tests {
             m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
             World.CreateSystem<ExecuteActionSystem>().Update();
             var agentPatch = m_Manager.GetComponentData<Patch>(agent).Value;
-            Assert.AreEqual(1, m_Manager.GetComponentData<SleepEnergy>(agent).Value,"SleepEnergy");
+            Assert.AreEqual(ExperimentSetting.incrMultiplier, m_Manager.GetComponentData<SleepEnergy>(agent).Value,"SleepEnergy");
             Assert.AreEqual(-1, m_Manager.GetComponentData<FoodEnergy>(agent).Value,"FoodEnergy");
             Assert.AreEqual(0, m_Manager.GetComponentData<Facing>(agent).Value,"Facing");
             Assert.AreEqual(new float2(1.5f, 1.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");

@@ -146,18 +146,17 @@ public class ExecuteActionSystem : JobComponentSystem {
         
         public EntityCommandBuffer.Concurrent ecb;
 
-        public float eatMultiplier;
+        public float incrMultiplier;
         public float turnAngle;
         public void Execute(Entity entity, int entityInQueryIndex, ref FoodEnergy foodEnergy,
             ref SleepEnergy sleepEnergy,ref PosXY posXY, ref Facing facing, [ReadOnly] ref Action action, 
              [ReadOnly] ref Patch patch) {
 
-            float eatAmount = math.select(0f, 1f,
+            float eatAmount = math.select(-1f, 1f* incrMultiplier,
                 (action.Value == Genome.Allele.Eat) && (foodAreaLookup[patch.Value].Value > 0));
-            foodEnergy.Value += eatAmount * eatMultiplier;
-            foodEnergy.Value -= 1f - eatAmount; // if not eating -1 food
-             
-            float sleepAmount = math.select(-1f, 1f,
+            foodEnergy.Value += eatAmount ;
+            
+            float sleepAmount = math.select(-1f, 1f*incrMultiplier,
                 (action.Value == Genome.Allele.Sleep) && sleepAreaLookup[patch.Value].Value);
             sleepEnergy.Value = sleepAmount; // if not sleeping -1 sleep
             
@@ -189,8 +188,8 @@ public class ExecuteActionSystem : JobComponentSystem {
                 facing.Value %= 2f * math.PI;
             }
             
-            if (eatAmount != 0) {
-                ecb.AddComponent(entityInQueryIndex,patch.Value,new AdjustFoodArea(){Value = -1*eatAmount});
+            if (eatAmount >0) {
+                ecb.AddComponent(entityInQueryIndex,patch.Value,new AdjustFoodArea(){Value = -1});
             }
         }
     }
@@ -204,7 +203,7 @@ public class ExecuteActionSystem : JobComponentSystem {
            sleepAreaLookup = sleepAreas,
            foodAreaLookup = foodAreas,
            ecb = ecb,
-           eatMultiplier = ExperimentSetting.eatMultiplier,
+           incrMultiplier = ExperimentSetting.incrMultiplier,
            turnAngle = ExperimentSetting.turnAngleRadian
         }; 
         var jobHandle = job.Schedule(m_Group, inputDependencies);
