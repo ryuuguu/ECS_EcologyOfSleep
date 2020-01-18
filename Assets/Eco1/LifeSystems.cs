@@ -31,6 +31,7 @@ public class UpdateGrowAutotrophSystem : JobComponentSystem
 // so how to find entities with same shared component to read from 
 [AlwaysSynchronizeSystem]
 [BurstCompile]
+
 public class UpdateCellEnergyAutotrophSystem : JobComponentSystem {
     EntityQuery m_Group;
 

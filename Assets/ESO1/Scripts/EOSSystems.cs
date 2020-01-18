@@ -6,7 +6,58 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Collections;
 using UnityEditor;
+using UnityEngine;
 using Random = Unity.Mathematics.Random;
+
+/// <summary>
+/// decide attempt sleep or eat (before(Can't eat, can't sleep))
+///check genome
+///  if eat or sleep use them
+///  if choose compare energies 
+/// 
+/// </summary>
+[AlwaysSynchronizeSystem]
+[BurstCompile]
+public class AdjustFoodAreaSystem : JobComponentSystem {
+    EntityQuery m_Group;
+    protected EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
+    protected override void OnCreate() {
+        base.OnCreate();
+        m_Group = GetEntityQuery(
+            ComponentType.ReadWrite<FoodArea>(),
+            ComponentType.ReadWrite<AdjustFoodArea>()
+        );
+        m_EndSimulationEcbSystem = World
+            .GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+    }
+    
+    struct AdjustFoodAreaJob : IJobForEachWithEntity< FoodArea,AdjustFoodArea> {
+        
+        public EntityCommandBuffer.Concurrent ecb;
+        
+        public void Execute(Entity entity, int entityInQueryIndex, ref FoodArea foodArea,
+            [ReadOnly] ref AdjustFoodArea adjustFoodArea) {
+
+            foodArea.Value += adjustFoodArea.Value;
+            ecb.RemoveComponent<AdjustFoodArea>(entityInQueryIndex,entity);
+        }
+    }
+
+    protected override JobHandle OnUpdate(JobHandle inputDependencies) {
+        
+        
+        var ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().ToConcurrent();
+        var job = new AdjustFoodAreaJob() {
+            ecb = ecb
+        };
+        var jobHandle = job.Schedule(m_Group, inputDependencies);
+        m_EndSimulationEcbSystem.AddJobHandleForProducer(jobHandle);
+        return jobHandle;
+    }
+}
+
+
+
 
 
 /// <summary>
@@ -18,6 +69,7 @@ using Random = Unity.Mathematics.Random;
 /// </summary>
 [AlwaysSynchronizeSystem]
 [BurstCompile]
+[UpdateBefore(typeof(ExecuteActionSystem))]
 public class SetActionSystem : JobComponentSystem {
     EntityQuery m_Group;
 
@@ -40,7 +92,6 @@ public class SetActionSystem : JobComponentSystem {
     }
     
     struct SetActionJob : IJobForEach<Action,Genome,FoodEnergy,SleepEnergy> {
-
         public int hour;
         
         public void Execute(ref Action action, [ReadOnly] ref Genome genome, [ReadOnly] ref FoodEnergy foodEnergy,

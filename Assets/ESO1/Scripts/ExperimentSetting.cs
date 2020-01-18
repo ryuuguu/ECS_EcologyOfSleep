@@ -68,7 +68,7 @@ public class ExperimentSetting : MonoBehaviour {
                 var patch = em.CreateEntity();
                 em.AddComponentData(patch, new PosXY() {Value = new float2(x, y)});
                 em.AddComponentData(patch, new SleepArea() {Value = false});
-                em.AddComponentData(patch, new FoodArea() {Value = 3});
+                em.AddComponentData(patch, new FoodArea() {Value = 0});
                 patches[i, j] = patch;
             }
         }
