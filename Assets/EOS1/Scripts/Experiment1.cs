@@ -7,9 +7,9 @@ using Unity.Mathematics;
 using Random = Unity.Mathematics.Random;
 
 
-public class Experiment1  {
+public class Experiment1 {
 
-
+    public static int2 gridSize;
     public static int minuteMod = 60;
     public static int hourMod = 24;
 
@@ -41,26 +41,82 @@ public class Experiment1  {
         }
     }
 
+    /// <summary>
+    /// Cluster
+    ///     returns a list quantity coordinates centered at center of a radius radius.
+    /// coordinates a re between (0,0) and aGridSize
+    /// use random generator aRandom
+    /// </summary>
+    /// <param name="aGridSize"></param>
+    /// <param name="center"></param>
+    /// <param name="radius"></param>
+    /// <param name="quantity"></param>
+    /// <param name="aRandom"></param>
+    /// <returns></returns>
+    public static List<int2> Cluster(int2 aGridSize, float2 center, float radius, int quantity, Random aRandom) {
+        var result = new List<int2>();
+        var rect = new int4(0, 0, aGridSize.x, aGridSize.y);
+        rect.x = math.max(rect.x, (int)math.floor(center.x - radius));
+        rect.y = math.max(rect.y, (int)math.floor(center.y - radius));
+        rect.z = math.min(rect.z, (int)math.ceil(center.x + radius));
+        rect.w = math.min(rect.w, (int)math.ceil(center.y + radius));
+        
+        var rSquared = radius * radius;
+        var allCoords = new List<int2>();
+        for (int i = rect.x; i < rect.z + 1; i++) {
+            for (int j = rect.y; j < rect.w + 1; j++) {
+                if (math.distancesq(center, new float2(i, j)) < rSquared) {
+                    allCoords.Add(new int2(i,j));
+                }
+            }
+        }
 
+        for (int i = 0; i < quantity; i++) {
+            if (allCoords.Count == 0) break;
+            var index = aRandom.NextInt(0, allCoords.Count);
+            result.Add(allCoords[index]);
+            allCoords.RemoveAt(index);
+        }
+        
+        return result;
+    }
+
+    public void FoodCluster(int2 aGridSize, float2 center, float radius, int quantity, int minFood, int maxFood, Random aRandom) {
+        var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
+        foreach (var c in coords) {
+            var patch =patches[c.x, c.y];
+            em.SetComponentData(patch, new FoodArea(){Value = aRandom.NextInt(minFood,maxFood)}); 
+            EOSGrid.SetFood(c);
+        }
+    }
+    
+    public void SleepCluster(int2 aGridSize, float2 center, float radius, int quantity, Random aRandom) {
+        var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
+        foreach (var c in coords) {
+            var patch =patches[c.x, c.y];
+            em.SetComponentData(patch, new SleepArea(){Value = true}); 
+            EOSGrid.SetSleep(c);
+        }
+    }
+
+    
     public void DisplayTest(int2 size) {
+        gridSize = size;
         hour = 0;
         turnAngleRadian = math.PI / 2f; //90º
         incrMultiplier = 3;
         em  = World.DefaultGameObjectInjectionWorld.EntityManager;
         SetRandomSeed(1);
-        SetupPatches(size.x, size.y);
+        SetupPatches(gridSize.x, gridSize.y);
         agent = SetupAgent(new float2(1.5f, 1.5f));
-        var centerPatch =patches[1, 1];
-        em.SetComponentData(centerPatch, new FoodArea(){Value = 2});
-        var sleepPatch =patches[2, 2];
-        em.SetComponentData(sleepPatch, new SleepArea(){Value =true});
+        FoodCluster(gridSize,new float2(30,30),10,40, 15,200, new Random(random.NextUInt()));
+        SleepCluster(gridSize,new float2(10,10),10,40,  new Random(random.NextUInt()));
         em.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
         em.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
         
         var agentPatch = em.GetComponentData<Patch>(agent).Value;
-        EOSGrid.SetFood(new int2(1,1));
-        EOSGrid.SetSleep(new int2(2,2));
-        Debug.Log(em.HasComponent<AdjustFoodArea>(centerPatch));
+        
+        
     }
     
     public void Test() {
