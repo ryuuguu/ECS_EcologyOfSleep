@@ -26,15 +26,12 @@ public class ExperimentSetting : MonoBehaviour {
     public EntityManager em;
 
     private Entity agent;
-
-    private void Start() {
-       // Test();
-    }
+    
 
     public void Update() {
         NextTick();
     }
-
+    
     public static void NextTick() {
         minute++;
         minute %= minuteMod;
