@@ -56,11 +56,14 @@ public class ExperimentSetting : MonoBehaviour {
         agent = SetupAgent(new float2(1.5f, 1.5f));
         var centerPatch =patches[1, 1];
         em.SetComponentData(centerPatch, new FoodArea(){Value = 2});
+        var sleepPatch =patches[2, 2];
+        em.SetComponentData(sleepPatch, new SleepArea(){Value =true});
         em.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
         em.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
         
         var agentPatch = em.GetComponentData<Patch>(agent).Value;
-       
+        EOSGrid.SetFood(new int2(1,1));
+        EOSGrid.SetSleep(new int2(2,2));
         Debug.Log(em.HasComponent<AdjustFoodArea>(centerPatch));
     }
     
