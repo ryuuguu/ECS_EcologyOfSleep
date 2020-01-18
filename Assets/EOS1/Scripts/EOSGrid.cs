@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 public class EOSGrid : MonoBehaviour {
     
@@ -8,22 +9,25 @@ public class EOSGrid : MonoBehaviour {
     public bool stressTest = false;
     public float worldSize = 10f;
     public Transform holder;
-    public Transform holderSC;
-    public GameObject prefabCell;
+    
+    public GameObject prefabAgent;
     public GameObject prefabMesh;
     public Vector2 _offset;
     public Vector2 _scale ;
+
+    public GameObject agent;
+
+    public Material backgroundMaterial;
+    public Material foodMaterial;
+    public Material sleepMaterial;
+    public Material foodEnergy;
+    public Material sleepEnergy;
     
-    // for next tutorial
-    public Material[] materials;
-    public static Material[] materialsStatic;
-    public int superCellScale = 2;
-    
-    //Entity[,] _cells;
-    private static MeshRenderer[,] _meshRenderersSC;
     private static MeshRenderer[,] _meshRenderers;
+    private static EOSGrid inst;
 
     public void Start() {
+        inst = this;
         InitDisplay();
     }
     
@@ -43,5 +47,21 @@ public class EOSGrid : MonoBehaviour {
             }
         }
     }
+
+    public static void SetFood(int2 loc) {
+        _meshRenderers[loc.x, loc.y].material = inst.foodMaterial;
+    }
     
+    public static void SetSleep(int2 loc) {
+        _meshRenderers[loc.x, loc.y].material = inst.sleepMaterial;
+    }
+
+    public static void SetAgent(float2 loc, float foodFitness, float sleepFitness) {
+        inst.SetAgentInstance(loc, foodFitness, sleepFitness);
+    }
+    
+    public void SetAgentInstance(float2 loc, float foodFitness, float sleepFitness) {
+        var pos = new Vector3(loc.x * _scale.x + _offset.x, loc.y * _scale.y + _offset.y, -1);
+        agent.transform.localPosition = pos;
+    }
 }

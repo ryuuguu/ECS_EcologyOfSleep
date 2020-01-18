@@ -77,7 +77,7 @@ public class SetActionSystem : JobComponentSystem {
 
     protected override void OnCreate() {
         // Cached access to a set of ComponentData based on a specific query
-        m_Group = GetEntityQuery(ComponentType.ReadOnly<Genome>(),
+        m_Group = GetEntityQuery(ComponentType.ReadWrite<Genome>(),
             ComponentType.ReadWrite<Action>(),
             ComponentType.ReadOnly<FoodEnergy>(),
             ComponentType.ReadOnly<SleepEnergy>()
@@ -213,8 +213,53 @@ public class ExecuteActionSystem : JobComponentSystem {
 
     }
     
-   
 }
 
+/// <summary>
+/// decide attempt sleep or eat (before(Can't eat, can't sleep))
+///check genome
+///  if eat or sleep use them
+///  if choose compare energies 
+/// 
+/// </summary>
+[UpdateInGroup(typeof(PresentationSystemGroup))]
+[AlwaysSynchronizeSystem]
+[BurstCompile]
+public class DisplayAgentSystem : JobComponentSystem {
+    EntityQuery m_Group;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
+    protected override void OnCreate() {
+        // Cached access to a set of ComponentData based on a specific query
+        m_Group = GetEntityQuery(
+            ComponentType.ReadOnly<Action>(),
+            ComponentType.ReadOnly<FoodEnergy>(),
+            ComponentType.ReadOnly<SleepEnergy>(),
+            ComponentType.ReadOnly<PosXY>()
+        );
+    }
+    
+    struct DisplayAgentJob : IJobForEach<Action,FoodEnergy,SleepEnergy,PosXY> {
+        public int hour;
+        
+        public void Execute([ReadOnly] ref Action action, [ReadOnly] ref  FoodEnergy foodEnergy,
+            [ReadOnly]ref  SleepEnergy sleepEnergy, [ReadOnly]ref PosXY posXY ) {
+            
+            
+            
+        }
+    }
+
+    protected override JobHandle OnUpdate(JobHandle inputDependencies) {
+        
+        var job = new DisplayAgentJob {
+            hour = ExperimentSetting.hour
+        };
+        return job.Run(m_Group, inputDependencies);
+    }
+    
+   
+}
 
 

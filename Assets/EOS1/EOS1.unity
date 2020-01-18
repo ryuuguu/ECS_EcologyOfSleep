@@ -425,14 +425,17 @@ MonoBehaviour:
   stressTest: 0
   worldSize: 10
   holder: {fileID: 293954020}
-  holderSC: {fileID: 0}
-  prefabCell: {fileID: 0}
+  prefabAgent: {fileID: 0}
   prefabMesh: {fileID: 9178653641751187751, guid: 82d831f6aec8b4d8ab245d2ef4031e5d,
     type: 3}
   _offset: {x: 0, y: 0}
   _scale: {x: 0, y: 0}
-  materials: []
-  superCellScale: 2
+  agent: {fileID: 0}
+  backgroundMaterial: {fileID: 2100000, guid: edbc71782fd594f3d9eed60cf0155d93, type: 2}
+  foodMaterial: {fileID: 2100000, guid: ccd60615f3f0747a7a1057e75de70569, type: 2}
+  sleepMaterial: {fileID: 2100000, guid: bbe2176b1f8ba4f9a801a79e067c9db8, type: 2}
+  foodEnergy: {fileID: 2100000, guid: ccd60615f3f0747a7a1057e75de70569, type: 2}
+  sleepEnergy: {fileID: 2100000, guid: bbe2176b1f8ba4f9a801a79e067c9db8, type: 2}
 --- !u!1 &1893414270
 GameObject:
   m_ObjectHideFlags: 0
