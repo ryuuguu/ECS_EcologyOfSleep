@@ -100,7 +100,7 @@ public class SetActionSystem : JobComponentSystem {
     protected override JobHandle OnUpdate(JobHandle inputDependencies) {
         
         var job = new SetActionJob() {
-            hour = ExperimentSetting.hour
+            hour = Experiment1.hour
         };
         return job.Schedule(m_Group, inputDependencies);
     }
@@ -200,8 +200,8 @@ public class ExecuteActionSystem : JobComponentSystem {
            sleepAreaLookup = sleepAreas,
            foodAreaLookup = foodAreas,
            ecb = ecb,
-           incrMultiplier = ExperimentSetting.incrMultiplier,
-           turnAngle = ExperimentSetting.turnAngleRadian
+           incrMultiplier = Experiment1.incrMultiplier,
+           turnAngle = Experiment1.turnAngleRadian
         }; 
         var jobHandle = job.Schedule(m_Group, inputDependencies);
         m_EndSimulationEcbSystem.AddJobHandleForProducer(jobHandle);

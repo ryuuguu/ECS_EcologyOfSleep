@@ -5,7 +5,7 @@ using Unity.Mathematics;
 
 public class EOSGrid : MonoBehaviour {
 
-    public ExperimentSetting experimentSetting;
+    public Experiment1 experiment;
     
     public Vector2Int size = new Vector2Int(10,10);
     public bool stressTest = false;
@@ -29,10 +29,11 @@ public class EOSGrid : MonoBehaviour {
     private static EOSGrid inst;
 
     public void Start() {
+        experiment = new Experiment1();
         inst = this;
         InitDisplay();
         agent = prefabAgent;
-        experimentSetting.DisplayTest(new int2(size.x,size.y));
+        experiment.DisplayTest(new int2(size.x,size.y));
         
     }
     

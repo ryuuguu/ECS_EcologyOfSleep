@@ -463,7 +463,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1678352934}
-  - component: {fileID: 1678352933}
   - component: {fileID: 1678352935}
   m_Layer: 0
   m_Name: Grid
@@ -472,19 +471,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1678352933
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1678352932}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7c1a91bac4994998a4dcaf941e99d77, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 1
 --- !u!4 &1678352934
 Transform:
   m_ObjectHideFlags: 0
@@ -513,7 +499,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91ac76191d9ed4f28af408d14f6c7821, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  experimentSetting: {fileID: 1678352933}
   size: {x: 10, y: 10}
   stressTest: 0
   worldSize: 10

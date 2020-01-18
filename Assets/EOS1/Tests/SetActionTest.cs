@@ -18,7 +18,7 @@ namespace Tests {
         [Test]
         public void SetActionSystemTest() {
 
-            ExperimentSetting.hour = 0;
+            Experiment1.hour = 0;
             var instance = m_Manager.CreateEntity();
             m_Manager.AddComponentData(instance, new Genome {h0 = Genome.Allele.Eat});
             m_Manager.AddComponentData(instance, new Action {Value = (Genome.Allele) Genome.Allele.Eat});

@@ -6,7 +6,8 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Random = Unity.Mathematics.Random;
 
-public class ExperimentSetting : MonoBehaviour {
+
+public class Experiment1  {
 
 
     public static int minuteMod = 60;
@@ -27,10 +28,6 @@ public class ExperimentSetting : MonoBehaviour {
 
     private Entity agent;
     
-
-    public void Update() {
-        NextTick();
-    }
     
     public static void NextTick() {
         minute++;
@@ -49,7 +46,6 @@ public class ExperimentSetting : MonoBehaviour {
         hour = 0;
         turnAngleRadian = math.PI / 2f; //90º
         incrMultiplier = 3;
-        var go = new GameObject("ExperimentSetting");
         em  = World.DefaultGameObjectInjectionWorld.EntityManager;
         SetRandomSeed(1);
         SetupPatches(size.x, size.y);
