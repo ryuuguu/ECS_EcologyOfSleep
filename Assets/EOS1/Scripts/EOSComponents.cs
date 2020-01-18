@@ -7,10 +7,18 @@ using Random = Unity.Mathematics.Random;
 
 public struct FoodEnergy : IComponentData {
     public float Value;
+    
+    public float Fitness() {
+        return 1f / (1f + math.exp(-1f  / 100 *  Value));
+    }
 }
 
 public struct SleepEnergy : IComponentData {
     public float Value;
+
+    public float Fitness() {
+        return 1f / (1f + math.exp(-1f/ 100 * Value ));
+    }
 }
 
 

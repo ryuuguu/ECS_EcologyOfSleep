@@ -74,14 +74,7 @@ public class SetActionSystem : JobComponentSystem {
     EntityQuery m_Group;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Genome.Allele SelectAction(Genome.Allele prevAllele, Genome.Allele currAllele, float foodNRG,
-        float sleepNRG) {
-        var prevChoice = math.select((int)prevAllele, (int)Genome.Allele.Eat, foodNRG + 0.1 < sleepNRG);
-        prevChoice = math.select(prevChoice, (int)Genome.Allele.Sleep, sleepNRG + 0.1 < foodNRG);
-        prevChoice = math.select(prevChoice, (int)Genome.Allele.Eat, currAllele == Genome.Allele.Eat);
-        return (Genome.Allele) math.select(prevChoice, (int)Genome.Allele.Sleep, currAllele == Genome.Allele.Sleep);
-    }
-    
+
     protected override void OnCreate() {
         // Cached access to a set of ComponentData based on a specific query
         m_Group = GetEntityQuery(ComponentType.ReadOnly<Genome>(),
@@ -96,8 +89,14 @@ public class SetActionSystem : JobComponentSystem {
         
         public void Execute(ref Action action, [ReadOnly] ref Genome genome, [ReadOnly] ref FoodEnergy foodEnergy,
             [ReadOnly] ref SleepEnergy sleepEnergy) {
-            action = new Action(){Value = SelectAction(action.Value,genome[hour],
-                foodEnergy.Value, sleepEnergy.Value)};
+
+            var foodFitness = foodEnergy.Fitness();
+            var sleepFitness = sleepEnergy.Fitness();
+            var prevChoice = math.select((int)action.Value, (int)Genome.Allele.Eat, foodFitness + 0.1f < sleepFitness);
+            prevChoice = math.select(prevChoice, (int)Genome.Allele.Sleep, sleepFitness + 0.1f < foodFitness);
+            prevChoice = math.select(prevChoice, (int)Genome.Allele.Eat, genome[hour] == Genome.Allele.Eat);
+            action = new Action(){Value =  (Genome.Allele) math.select(prevChoice, (int)Genome.Allele.Sleep,
+                    genome[hour] == Genome.Allele.Sleep)};
         }
     }
 

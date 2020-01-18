@@ -85,8 +85,12 @@ namespace Tests {
             }
             
             // FoodNrg > SleepNRG
-            m_Manager.SetComponentData(instance, new FoodEnergy() {Value = 1});
-            m_Manager.SetComponentData(instance, new SleepEnergy() {Value = 0});
+            var foodEnergy = new FoodEnergy() {Value = 100};
+            var foodFitness = foodEnergy.Fitness();
+            var sleepEnergy = new SleepEnergy() {Value = 0};
+            var sleepFitness = sleepEnergy.Fitness();
+            m_Manager.SetComponentData(instance, foodEnergy);
+            m_Manager.SetComponentData(instance, sleepEnergy);
             for (int i = 0; i < 2; i++) {
                 if (i == 0) {
                     m_Manager.SetComponentData(instance, new Action() {Value = Genome.Allele.Eat});
@@ -101,12 +105,18 @@ namespace Tests {
 
                 setAction.Update();
                 action = m_Manager.GetComponentData<Action>(instance).Value;
-                Assert.AreEqual(expected, action, "{0} {1} {2} {3}", prevAction2, currAllele, 1, 0);
+                Assert.AreEqual(expected, action, "{0} {1} {2} {3} FF{4} SF {5}",
+                    prevAction2, currAllele, foodEnergy.Value, sleepEnergy.Value, foodFitness, sleepFitness );
             }
             
             // FoodNrg < SleepNRG
-            m_Manager.SetComponentData(instance, new FoodEnergy() {Value = 0});
-            m_Manager.SetComponentData(instance, new SleepEnergy() {Value = 1});
+            
+            foodEnergy = new FoodEnergy() {Value = 0};
+            foodFitness = foodEnergy.Fitness();
+            sleepEnergy = new SleepEnergy() {Value = 100};
+            sleepFitness = sleepEnergy.Fitness();
+            m_Manager.SetComponentData(instance, foodEnergy);
+            m_Manager.SetComponentData(instance, sleepEnergy);
             for (int i = 0; i < 2; i++) {
                 if (i == 0) {
                     m_Manager.SetComponentData(instance, new Action() {Value = Genome.Allele.Eat});
@@ -121,7 +131,8 @@ namespace Tests {
 
                 setAction.Update();
                 action = m_Manager.GetComponentData<Action>(instance).Value;
-                Assert.AreEqual(expected, action, "{0} {1} {2} {3}", prevAction2, currAllele, 0, 1);
+                Assert.AreEqual(expected, action, "{0} {1} {2} {3} FF{4} SF {5}",
+                    prevAction2, currAllele, foodEnergy.Value, sleepEnergy.Value, foodFitness, sleepFitness );
             }
         }
     }
