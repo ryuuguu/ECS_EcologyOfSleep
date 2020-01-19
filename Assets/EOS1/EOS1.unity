@@ -227,7 +227,7 @@ Transform:
   m_GameObject: {fileID: 293954019}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 12, y: 12, z: 1}
+  m_LocalScale: {x: 10, y: 10, z: 1}
   m_Children:
   - {fileID: 1063813220}
   m_Father: {fileID: 1678352934}
@@ -500,15 +500,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   size: {x: 40, y: 40}
-  stressTest: 0
-  worldSize: 10
   holder: {fileID: 293954020}
   prefabAgent: {fileID: 1063813221}
   prefabMesh: {fileID: 9178653641751187751, guid: 82d831f6aec8b4d8ab245d2ef4031e5d,
     type: 3}
   _offset: {x: 0, y: 0}
   _scale: {x: 0, y: 0}
-  agent: {fileID: 0}
+  agent: {fileID: 1063813221}
   backgroundMaterial: {fileID: 2100000, guid: edbc71782fd594f3d9eed60cf0155d93, type: 2}
   foodMaterial: {fileID: 2100000, guid: ccd60615f3f0747a7a1057e75de70569, type: 2}
   sleepMaterial: {fileID: 2100000, guid: bbe2176b1f8ba4f9a801a79e067c9db8, type: 2}

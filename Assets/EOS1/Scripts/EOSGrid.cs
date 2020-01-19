@@ -8,8 +8,6 @@ public class EOSGrid : MonoBehaviour {
     public Experiment1 experiment;
     
     public Vector2Int size = new Vector2Int(10,10);
-    public bool stressTest = false;
-    public float worldSize = 10f;
     public Transform holder;
     
     public GameObject prefabAgent;
@@ -62,13 +60,21 @@ public class EOSGrid : MonoBehaviour {
         _meshRenderers[loc.x, loc.y].material = inst.sleepMaterial;
     }
 
-    public static void SetAgent(float2 loc, float foodFitness, float sleepFitness) {
-        inst.SetAgentInstance(loc, foodFitness, sleepFitness);
+    public static void SetAgent(float2 loc, float foodFitness, float sleepFitness, Genome.Allele action ) {
+        inst.SetAgentInstance(loc, foodFitness, sleepFitness, action );
     }
     
-    public void SetAgentInstance(float2 loc, float foodFitness, float sleepFitness) {
-        Debug.Log("SetAgentInstance "+ loc + " : " + foodFitness + " : "+ sleepFitness);
+    public void SetAgentInstance(float2 loc, float foodFitness, float sleepFitness, Genome.Allele action ) {
+        Debug.Log("SetAgentInstance "+ loc + " : " + foodFitness + " : "+ sleepFitness + " : "+ action);
         var pos = new Vector3(loc.x * _scale.x + _offset.x, loc.y * _scale.y + _offset.y, -1);
         agent.transform.localPosition = pos;
+    }
+    
+    public static void SetPatch(float2 loc, float foodArea, bool sleepArea ) {
+        inst.SetPatchInstance(loc, foodArea, sleepArea );
+    }
+
+    public void SetPatchInstance(float2 loc, float foodArea, bool sleepArea) {
+        Debug.Log("SetAgentInstance " + loc + " : " + foodArea + " : " + sleepArea);
     }
 }

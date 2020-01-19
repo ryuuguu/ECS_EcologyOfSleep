@@ -18,6 +18,7 @@ using Random = Unity.Mathematics.Random;
 /// </summary>
 [AlwaysSynchronizeSystem]
 [BurstCompile]
+[UpdateBefore(typeof(SetActionSystem))]
 public class AdjustFoodAreaSystem : JobComponentSystem {
     EntityQuery m_Group;
     protected EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
@@ -58,8 +59,6 @@ public class AdjustFoodAreaSystem : JobComponentSystem {
 
 
 
-
-
 /// <summary>
 /// decide attempt sleep or eat (before(Can't eat, can't sleep))
 ///check genome
@@ -87,8 +86,8 @@ public class SetActionSystem : JobComponentSystem {
         public void Execute(ref Action action, [ReadOnly] ref Genome genome, [ReadOnly] ref FoodEnergy foodEnergy,
             [ReadOnly] ref SleepEnergy sleepEnergy) {
 
-            var foodFitness = foodEnergy.Fitness();
-            var sleepFitness = sleepEnergy.Fitness();
+            var foodFitness = FoodEnergy.Fitness(foodEnergy.Value);
+            var sleepFitness = SleepEnergy.Fitness(sleepEnergy.Value);
             var prevChoice = math.select((int)action.Value, (int)Genome.Allele.Eat, foodFitness + 0.1f < sleepFitness);
             prevChoice = math.select(prevChoice, (int)Genome.Allele.Sleep, sleepFitness + 0.1f < foodFitness);
             prevChoice = math.select(prevChoice, (int)Genome.Allele.Eat, genome[hour] == Genome.Allele.Eat);
@@ -104,17 +103,13 @@ public class SetActionSystem : JobComponentSystem {
         };
         return job.Schedule(m_Group, inputDependencies);
     }
-    
-   
 }
 
 
 /// <summary>
-/// decide attempt sleep or eat (before(Can't eat, can't sleep))
-///check genome
-///  if eat or sleep use them
-///  if choose compare energies 
-/// 
+/// ExecuteActionSystem
+///   execute action for agent
+///   eat, sleep or move
 /// </summary>
 [AlwaysSynchronizeSystem]
 [BurstCompile]
@@ -155,7 +150,7 @@ public class ExecuteActionSystem : JobComponentSystem {
             
             float sleepAmount = math.select(-1f, 1f*incrMultiplier,
                 (action.Value == Genome.Allele.Sleep) && sleepAreaLookup[patch.Value].Value);
-            sleepEnergy.Value = sleepAmount; // if not sleeping -1 sleep
+            sleepEnergy.Value += sleepAmount; // if not sleeping -1 sleep
             
             var move = ((sleepAmount <= 0) &&   (eatAmount <= 0)) ;
 
@@ -206,18 +201,48 @@ public class ExecuteActionSystem : JobComponentSystem {
         var jobHandle = job.Schedule(m_Group, inputDependencies);
         m_EndSimulationEcbSystem.AddJobHandleForProducer(jobHandle);
         return jobHandle;
-
-
     }
     
 }
 
+
+
 /// <summary>
-/// decide attempt sleep or eat (before(Can't eat, can't sleep))
-///check genome
-///  if eat or sleep use them
-///  if choose compare energies 
-/// 
+/// SetPatchSystem
+///   update patch to match PosXY
+/// </summary>
+[AlwaysSynchronizeSystem]
+[BurstCompile]
+[UpdateAfter(typeof(ExecuteActionSystem))]
+public class SetPatchSystem : JobComponentSystem {
+    EntityQuery m_Group;
+    protected override void OnCreate() {
+        // Cached access to a set of ComponentData based on a specific query
+        m_Group = GetEntityQuery(ComponentType.ReadWrite<Genome>(),
+            ComponentType.ReadWrite<Patch>(),
+            ComponentType.ReadOnly<PosXY>()
+        );
+    }
+    
+    struct SetPatchJob : IJobForEach<Patch,PosXY> {
+
+        public void Execute(ref Patch patch, [ReadOnly] ref PosXY posXY) {
+            patch = new Patch(){Value = Experiment1.patches[(int)posXY.Value.x,(int)posXY.Value.y]};
+        }
+    }
+
+    protected override JobHandle OnUpdate(JobHandle inputDependencies) {
+
+        var job = new SetPatchJob();
+        return job.Schedule(m_Group, inputDependencies);
+    }
+}
+
+
+
+/// <summary>
+/// DisplayAgentSystem
+///  send agent status to EOSGrid.SetAgent()
 /// </summary>
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 [AlwaysSynchronizeSystem]
@@ -230,13 +255,36 @@ public class DisplayAgentSystem : JobComponentSystem {
              .WithoutBurst()
             .ForEach((in Action action, in  FoodEnergy foodEnergy,
              in  SleepEnergy sleepEnergy, in PosXY posXY)=> {
-                EOSGrid.SetAgent(posXY.Value,foodEnergy.Fitness(),sleepEnergy.Fitness());   
+                EOSGrid.SetAgent(posXY.Value, 
+                    FoodEnergy.Fitness(foodEnergy.Value), SleepEnergy.Fitness(sleepEnergy.Value),
+                    //foodEnergy.Value, sleepEnergy.Value,
+                    action.Value);   
             }).Run();
        
         return default;
     }
-    
-   
 }
 
+/*
+/// <summary>
+/// DisplayPatchesSystem
+///  send Patch status to EOSGrid.SetPatch()
+/// </summary>
+[UpdateInGroup(typeof(PresentationSystemGroup))]
+[AlwaysSynchronizeSystem]
+public class DisplayPatchesSystem : JobComponentSystem {
+    EntityQuery m_Group;
+
+    protected override JobHandle OnUpdate(JobHandle inputDeps) {
+        
+        Entities
+            .WithoutBurst()
+            .ForEach((in FoodArea foodArea, in  SleepArea sleepArea, in PosXY posXY)=> {
+                EOSGrid.SetPatch(posXY.Value, foodArea.Value, sleepArea.Value);   
+            }).Run();
+       
+        return default;
+    }
+}
+*/
 

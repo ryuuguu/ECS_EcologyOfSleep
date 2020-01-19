@@ -85,10 +85,13 @@ namespace Tests {
             }
             
             // FoodNrg > SleepNRG
-            var foodEnergy = new FoodEnergy() {Value = 100};
-            var foodFitness = foodEnergy.Fitness();
-            var sleepEnergy = new SleepEnergy() {Value = 0};
-            var sleepFitness = sleepEnergy.Fitness();
+            float  foodFitness,  sleepFitness;
+            FoodEnergy foodEnergy;
+            SleepEnergy sleepEnergy;
+            foodEnergy = new FoodEnergy() {Value = 100};
+            foodFitness = FoodEnergy.Fitness(foodEnergy.Value);
+            sleepEnergy = new SleepEnergy() {Value = 0};
+            sleepFitness = SleepEnergy.Fitness(sleepEnergy.Value);
             m_Manager.SetComponentData(instance, foodEnergy);
             m_Manager.SetComponentData(instance, sleepEnergy);
             for (int i = 0; i < 2; i++) {
@@ -112,9 +115,9 @@ namespace Tests {
             // FoodNrg < SleepNRG
             
             foodEnergy = new FoodEnergy() {Value = 0};
-            foodFitness = foodEnergy.Fitness();
+            foodFitness = FoodEnergy.Fitness(foodEnergy.Value);
             sleepEnergy = new SleepEnergy() {Value = 100};
-            sleepFitness = sleepEnergy.Fitness();
+            sleepFitness = SleepEnergy.Fitness(sleepEnergy.Value);
             m_Manager.SetComponentData(instance, foodEnergy);
             m_Manager.SetComponentData(instance, sleepEnergy);
             for (int i = 0; i < 2; i++) {

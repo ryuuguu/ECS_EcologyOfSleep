@@ -55,7 +55,7 @@ public class Experiment1 {
     /// <returns></returns>
     public static List<int2> Cluster(int2 aGridSize, float2 center, float radius, int quantity, Random aRandom) {
         var result = new List<int2>();
-        var rect = new int4(0, 0, aGridSize.x, aGridSize.y);
+        var rect = new int4(0, 0, aGridSize.x-1, aGridSize.y-1);
         rect.x = math.max(rect.x, (int)math.floor(center.x - radius));
         rect.y = math.max(rect.y, (int)math.floor(center.y - radius));
         rect.z = math.min(rect.z, (int)math.ceil(center.x + radius));
@@ -103,14 +103,17 @@ public class Experiment1 {
     public void DisplayTest(int2 size) {
         gridSize = size;
         hour = 0;
-        turnAngleRadian = math.PI / 2f; //90º
+        turnAngleRadian = math.PI / 12f; //15º
         incrMultiplier = 3;
         em  = World.DefaultGameObjectInjectionWorld.EntityManager;
         SetRandomSeed(1);
         SetupPatches(gridSize.x, gridSize.y);
         agent = SetupAgent(new float2(1.5f, 1.5f));
-        FoodCluster(gridSize,new float2(30,30),10,40, 15,200, new Random(random.NextUInt()));
-        SleepCluster(gridSize,new float2(10,10),10,40,  new Random(random.NextUInt()));
+        var foodCenter = ((float2)size) * 0.8f;
+        FoodCluster(gridSize,foodCenter,10,40, 15,200, new Random(random.NextUInt()));
+        var sleepCenter = ((float2)size) * 0.2f;
+        Debug.Log("sleepCenter " + sleepCenter);
+        SleepCluster(gridSize,sleepCenter,10,40,  new Random(random.NextUInt()));
         em.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
         em.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
         
