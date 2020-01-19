@@ -254,18 +254,18 @@ public class DisplayAgentSystem : JobComponentSystem {
          Entities
              .WithoutBurst()
             .ForEach((in Action action, in  FoodEnergy foodEnergy,
-             in  SleepEnergy sleepEnergy, in PosXY posXY)=> {
+             in  SleepEnergy sleepEnergy, in PosXY posXY, in Genome genome)=> {
                 EOSGrid.SetAgent(posXY.Value, 
                     FoodEnergy.Fitness(foodEnergy.Value), SleepEnergy.Fitness(sleepEnergy.Value),
                     //foodEnergy.Value, sleepEnergy.Value,
-                    action.Value);   
+                    action.Value,genome);   
             }).Run();
        
         return default;
     }
 }
 
-/*
+
 /// <summary>
 /// DisplayPatchesSystem
 ///  send Patch status to EOSGrid.SetPatch()
@@ -279,6 +279,7 @@ public class DisplayPatchesSystem : JobComponentSystem {
         
         Entities
             .WithoutBurst()
+            .WithAll<AdjustFoodArea>()
             .ForEach((in FoodArea foodArea, in  SleepArea sleepArea, in PosXY posXY)=> {
                 EOSGrid.SetPatch(posXY.Value, foodArea.Value, sleepArea.Value);   
             }).Run();
@@ -286,5 +287,5 @@ public class DisplayPatchesSystem : JobComponentSystem {
         return default;
     }
 }
-*/
+
 

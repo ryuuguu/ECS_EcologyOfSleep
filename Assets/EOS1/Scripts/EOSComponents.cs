@@ -104,6 +104,23 @@ public struct Genome  : IComponentData {
         }
     }
 
+    public override string ToString() {
+        string result = "G:";
+        for (int i = 0; i < 24; i++) {
+            if (this[i] == Allele.Sleep) {
+                result += "S";
+            } else if (this[i] == Allele.Eat) {
+                result += "E";
+            }
+
+            else {
+                result += "C";
+            }
+        }
+
+        return result;
+    }
+
     public enum Allele {
         Sleep,
         Eat,

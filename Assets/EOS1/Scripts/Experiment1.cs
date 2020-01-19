@@ -109,21 +109,27 @@ public class Experiment1 {
         SetRandomSeed(1);
         SetupPatches(gridSize.x, gridSize.y);
         agent = SetupAgent(new float2(1.5f, 1.5f));
+        em.SetComponentData(agent, RandomGenome(new Random(random.NextUInt())));
         var foodCenter = ((float2)size) * 0.8f;
         FoodCluster(gridSize,foodCenter,10,40, 15,200, new Random(random.NextUInt()));
         var sleepCenter = ((float2)size) * 0.2f;
-        Debug.Log("sleepCenter " + sleepCenter);
         SleepCluster(gridSize,sleepCenter,10,40,  new Random(random.NextUInt()));
         em.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
         em.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
         
         var agentPatch = em.GetComponentData<Patch>(agent).Value;
-        
-        
+    }
+
+    public Genome RandomGenome(Random aRandom) {
+        var result = new Genome();
+        for (int i = 0; i < 24; i++) {
+            var val = aRandom.NextInt(0, 3);
+            result[i] = (Genome.Allele) val;
+        }
+        return result;
     }
     
     public void Test() {
-        
         hour = 0;
         turnAngleRadian = math.PI / 2f; //90º
         incrMultiplier = 3;
@@ -140,9 +146,6 @@ public class Experiment1 {
         var agentPatch = em.GetComponentData<Patch>(agent).Value;
        
         Debug.Log(em.HasComponent<AdjustFoodArea>(centerPatch));
-        
-      
-        
     }
     
     /// <summary>
@@ -160,7 +163,7 @@ public class Experiment1 {
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 var patch = em.CreateEntity();
-                em.AddComponentData(patch, new PosXY() {Value = new float2(x, y)});
+                em.AddComponentData(patch, new PosXY() {Value = new float2(i, j)});
                 em.AddComponentData(patch, new SleepArea() {Value = false});
                 em.AddComponentData(patch, new FoodArea() {Value = 0});
                 patches[i, j] = patch;
