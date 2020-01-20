@@ -500,7 +500,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   size: {x: 40, y: 40}
-  levels: 100
+  levels: 2
   displaySimID: 0
   holder: {fileID: 293954020}
   prefabAgent: {fileID: 1063813221}

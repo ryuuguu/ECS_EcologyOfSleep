@@ -18,6 +18,8 @@ public class Experiment1 {
     public static int hour; //0~23
     public static int day; //0~6
     public static Entity[,,] patches;
+    public static bool[,,] patchExists;
+
     
 
     public float speed;
@@ -109,7 +111,6 @@ public class Experiment1 {
         em  = World.DefaultGameObjectInjectionWorld.EntityManager;
         SetRandomSeed(1);
         for (int simID = 0; simID < levels; simID++) {
-
             SetupPatches(levels, gridSize.x, gridSize.y);
             agent = SetupAgent(new float2(1.5f, 1.5f), simID);
             em.SetComponentData(agent, RandomGenome(new Random(random.NextUInt())));
@@ -163,6 +164,7 @@ public class Experiment1 {
 
     public void SetupPatches(int levels,int x, int y ) {
         patches = new Entity[x, y,levels];
+        patchExists =  new bool[x, y,levels];
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 for (int k = 0; k < levels; k++) {
@@ -171,6 +173,7 @@ public class Experiment1 {
                     em.AddComponentData(patch, new SleepArea() {Value = false});
                     em.AddComponentData(patch, new FoodArea() {Value = 0});
                     patches[i, j, k] = patch;
+                    patchExists[i, j, k] = false;
                 }
             }
         }
