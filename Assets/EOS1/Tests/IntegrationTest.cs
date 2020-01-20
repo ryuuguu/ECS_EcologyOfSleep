@@ -41,8 +41,8 @@ namespace Tests {
             experiment = new Experiment1();
             experiment.em = m_Manager;
             experiment.SetRandomSeed(1);
-            experiment.SetupPatches(3, 3);
-            agent = experiment.SetupAgent(new float2(1.5f, 1.5f));
+            experiment.SetupPatches(1,3, 3);
+            agent = experiment.SetupAgent(new float2(1.5f, 1.5f),0);
         }
 
         [TearDown]
@@ -59,7 +59,7 @@ namespace Tests {
         [Test]
         public void ThreeTickFoodTest() {
             // set up eat as first  actions and test for correct results 
-            var centerPatch = Experiment1.patches[1, 1];
+            var centerPatch = Experiment1.patches[1, 1,0];
             Experiment1.turnAngleRadian = 0; // always want to move straight for test.
             m_Manager.SetComponentData(centerPatch, new FoodArea(){Value = 2});
             m_Manager.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
@@ -114,7 +114,7 @@ namespace Tests {
             World.CreateSystem<ExecuteActionSystem>().Update();
             World.CreateSystem<SetPatchSystem>().Update();
             Assert.IsTrue( m_Manager.HasComponent<AdjustFoodArea>(centerPatch),"Tick 2 pre");
-            Assert.AreEqual(Experiment1.patches[2, 1],m_Manager.GetComponentData<Patch>(agent).Value);
+            Assert.AreEqual(Experiment1.patches[2, 1,0],m_Manager.GetComponentData<Patch>(agent).Value);
             Assert.AreEqual(new float2(2.5f, 1.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");
             
             // adjust food adjustFood removed

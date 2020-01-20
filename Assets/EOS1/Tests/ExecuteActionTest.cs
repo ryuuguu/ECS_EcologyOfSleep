@@ -43,8 +43,8 @@ namespace Tests {
             experiment = new Experiment1();
             experiment.em = m_Manager;
             experiment.SetRandomSeed(1);
-            experiment.SetupPatches(3, 3);
-            agent = experiment.SetupAgent(new float2(1.5f, 1.5f));
+            experiment.SetupPatches(1,3, 3);
+            agent = experiment.SetupAgent(new float2(1.5f, 1.5f),0);
         }
 
         [TearDown]
@@ -56,7 +56,7 @@ namespace Tests {
         [Test]
         public void ExecuteActionSystem_CantEatTest() {
             // set up eat as first action and test for correct results 
-            var centerPatch = Experiment1.patches[1, 1];
+            var centerPatch = Experiment1.patches[1, 1,0];
             m_Manager.SetComponentData(centerPatch, new FoodArea(){Value = 0});
             m_Manager.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
             m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
@@ -71,7 +71,7 @@ namespace Tests {
         [Test]
         public void ExecuteActionSystem_EatTest() {
              // set up eat as first action and test for correct results 
-             var centerPatch = Experiment1.patches[1, 1];
+             var centerPatch = Experiment1.patches[1, 1,0];
              m_Manager.SetComponentData(centerPatch, new FoodArea(){Value = 2});
              m_Manager.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
              m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
@@ -93,7 +93,7 @@ namespace Tests {
         [Test]
         public void ExecuteActionSystem_SleepTest() {
             // set up sleep as first action and test for correct results 
-            var centerPatch = Experiment1.patches[1, 1];
+            var centerPatch = Experiment1.patches[1, 1,0];
             m_Manager.SetComponentData(centerPatch, new SleepArea(){Value = true});
             m_Manager.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
             m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
@@ -108,7 +108,7 @@ namespace Tests {
         [Test]
         public void ExecuteActionSystem_CantSleepTest() {
             // set up sleep as first action and test for correct results 
-            var centerPatch = Experiment1.patches[1, 1];
+            var centerPatch = Experiment1.patches[1, 1,0];
             m_Manager.SetComponentData(centerPatch, new SleepArea(){Value = false});
             m_Manager.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
             m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
@@ -122,7 +122,7 @@ namespace Tests {
         
         [Test]
         public void ExecuteActionSystem_BounceY0Test() {
-            agent = experiment.SetupAgent(new float2(1.5f, 0.5f));
+            agent = experiment.SetupAgent(new float2(1.5f, 0.5f),0);
             m_Manager.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
             m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
             World.CreateSystem<ExecuteActionSystem>().Update();
@@ -134,7 +134,7 @@ namespace Tests {
         
         [Test]
         public void ExecuteActionSystem_BounceY2Test() {
-            agent = experiment.SetupAgent(new float2(1.5f, 2.5f));
+            agent = experiment.SetupAgent(new float2(1.5f, 2.5f),0);
             m_Manager.SetComponentData(agent, new Facing() {Value = math.PI, random = new Random(1)});
             m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
             World.CreateSystem<ExecuteActionSystem>().Update();
@@ -146,7 +146,7 @@ namespace Tests {
         
         [Test]
         public void ExecuteActionSystem_BounceX2Test() {
-            agent = experiment.SetupAgent(new float2(2.5f, 1.5f));
+            agent = experiment.SetupAgent(new float2(2.5f, 1.5f),0);
             m_Manager.SetComponentData(agent, new Facing() {Value = math.PI/2f, random = new Random(1)});
             m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
             World.CreateSystem<ExecuteActionSystem>().Update();
@@ -157,7 +157,7 @@ namespace Tests {
         
         [Test]
         public void ExecuteActionSystem_BounceX0Test() {
-            agent = experiment.SetupAgent(new float2(0.5f, 1.5f));
+            agent = experiment.SetupAgent(new float2(0.5f, 1.5f),0);
             m_Manager.SetComponentData(agent, new Facing() {Value = -1*math.PI/2f, random = new Random(1)});
             m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Sleep});
             World.CreateSystem<ExecuteActionSystem>().Update();

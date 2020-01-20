@@ -220,14 +220,15 @@ public class SetPatchSystem : JobComponentSystem {
         // Cached access to a set of ComponentData based on a specific query
         m_Group = GetEntityQuery(ComponentType.ReadWrite<Genome>(),
             ComponentType.ReadWrite<Patch>(),
-            ComponentType.ReadOnly<PosXY>()
+            ComponentType.ReadOnly<PosXY>(),
+            ComponentType.ReadOnly<SimID>()
         );
     }
     
-    struct SetPatchJob : IJobForEach<Patch,PosXY> {
+    struct SetPatchJob : IJobForEach<Patch,PosXY,SimID> {
 
-        public void Execute(ref Patch patch, [ReadOnly] ref PosXY posXY) {
-            patch = new Patch(){Value = Experiment1.patches[(int)posXY.Value.x,(int)posXY.Value.y]};
+        public void Execute(ref Patch patch, [ReadOnly] ref PosXY posXY, [ReadOnly]ref SimID simID) {
+            patch = new Patch(){Value = Experiment1.patches[(int)posXY.Value.x,(int)posXY.Value.y,simID.Value]};
         }
     }
 
@@ -254,8 +255,8 @@ public class DisplayAgentSystem : JobComponentSystem {
          Entities
              .WithoutBurst()
             .ForEach((in Action action, in  FoodEnergy foodEnergy,
-             in  SleepEnergy sleepEnergy, in PosXY posXY, in Genome genome)=> {
-                EOSGrid.SetAgent(posXY.Value, 
+             in  SleepEnergy sleepEnergy, in PosXY posXY, in SimID simID, in Genome genome)=> {
+                EOSGrid.SetAgent(simID.Value, posXY.Value, 
                     FoodEnergy.Fitness(foodEnergy.Value), SleepEnergy.Fitness(sleepEnergy.Value),
                     //foodEnergy.Value, sleepEnergy.Value,
                     action.Value,genome);   
@@ -280,8 +281,10 @@ public class DisplayPatchesSystem : JobComponentSystem {
         Entities
             .WithoutBurst()
             .WithAll<AdjustFoodArea>()
-            .ForEach((in FoodArea foodArea, in  SleepArea sleepArea, in PosXY posXY)=> {
-                EOSGrid.SetPatch(posXY.Value, foodArea.Value, sleepArea.Value);   
+            .ForEach((in FoodArea foodArea, in  SleepArea sleepArea, in PosXY posXY, in SimID simID)=> {
+                if (simID.Value == 0) {
+                    EOSGrid.SetPatch(simID.Value, posXY.Value, foodArea.Value, sleepArea.Value);
+                }
             }).Run();
        
         return default;

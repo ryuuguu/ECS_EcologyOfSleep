@@ -28,6 +28,10 @@ public struct PosXY : IComponentData {
     public static float2 bounds;
 }
 
+public struct SimID : IComponentData {
+    public int Value;
+}
+
 public struct SleepArea : IComponentData {
     public bool Value;
 }

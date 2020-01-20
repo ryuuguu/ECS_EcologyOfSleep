@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
@@ -8,6 +9,8 @@ public class EOSGrid : MonoBehaviour {
     public Experiment1 experiment;
     
     public Vector2Int size = new Vector2Int(10,10);
+    public int levels = 2;
+    public int displaySimID = 0;
     public Transform holder;
     
     public GameObject prefabAgent;
@@ -19,6 +22,7 @@ public class EOSGrid : MonoBehaviour {
     public float agentFood;
     public float agentSleep;
     public Genome agentGenome;
+    public AgentData[] agentDatas;
 
     public GameObject agent;
 
@@ -33,17 +37,26 @@ public class EOSGrid : MonoBehaviour {
 
     public void Start() {
         experiment = new Experiment1();
+        Experiment1.levels = levels;
+        agentDatas = new AgentData[Experiment1.levels];
         inst = this;
         InitDisplay();
         agent = prefabAgent;
         experiment.DisplayTest(new int2(size.x,size.y));
+        
         
     }
 
     public void Update() {
         Experiment1.NextTick();
         if (Experiment1.minute == 0 && Experiment1.hour == 0 && Experiment1.day == 7) {
-            Debug.Log("Loc "+ agentLoc + " : " + agentFood + " : " + agentSleep + " : "+ agentGenome);
+            foreach (var ag in agentDatas) {
+                Debug.Log("Loc " + ag.loc + " : " + ag.foodFitness + " : " + ag.sleepFitness + " : " + ag.genome);
+            }
+        }
+        if (Experiment1.minute == 1 && Experiment1.hour == 0) {
+            var ag = agentDatas[0];
+            Debug.Log("Loc " + ag.loc + " : " + ag.foodFitness + " : " + ag.sleepFitness + " : " + ag.genome);
         }
     }
     
@@ -64,46 +77,63 @@ public class EOSGrid : MonoBehaviour {
         }
     }
 
-    public static void SetFood(int2 loc) {
-        _meshRenderers[loc.x, loc.y].enabled = true;
-        _meshRenderers[loc.x, loc.y].material = inst.foodMaterial;
+    public static void SetFood(int simdID, int2 loc) {
+        if (simdID == inst.displaySimID) {
+            _meshRenderers[loc.x, loc.y].enabled = true;
+            _meshRenderers[loc.x, loc.y].material = inst.foodMaterial;
+        }
     }
     
-    public static void SetSleep(int2 loc) {
-        _meshRenderers[loc.x, loc.y].enabled = true;
-        _meshRenderers[loc.x, loc.y].material = inst.sleepMaterial;
+    public static void SetSleep(int simID,int2 loc) {
+        if (simID == inst.displaySimID) {
+            _meshRenderers[loc.x, loc.y].enabled = true;
+            _meshRenderers[loc.x, loc.y].material = inst.sleepMaterial;
+        }
     }
 
-    public static void SetClear(int2 loc) {
+    public static void SetClear(int2 loc) { 
         _meshRenderers[loc.x, loc.y].enabled = false;
     }
-    public static void SetAgent(float2 loc, float foodFitness, float sleepFitness, Genome.Allele action , Genome genome) {
-        inst.SetAgentInstance(loc, foodFitness, sleepFitness, action, genome );
-    }
-    
-    public void SetAgentInstance(float2 loc, float foodFitness, float sleepFitness, Genome.Allele action, Genome genome ) {
-        var pos = new Vector3((loc.x -0.5f)* _scale.x + _offset.x, (loc.y-0.5f) * _scale.y + _offset.y, -1);
-        agent.transform.localPosition = pos;
-        agentLoc = loc;
-        agentFood = foodFitness;
-        agentSleep = sleepFitness;
-        agentGenome = genome;
-
-    }
-    
-    public static void SetPatch(float2 loc, float foodArea, bool sleepArea ) {
-        inst.SetPatchInstance(loc, foodArea, sleepArea );
+    public static void SetAgent(int simID, float2 loc, float foodFitness, float sleepFitness, Genome.Allele action , Genome genome) {
+        inst.SetAgentInstance(simID, loc, foodFitness, sleepFitness, action, genome );
     }
 
-    public void SetPatchInstance(float2 loc, float foodArea, bool sleepArea) {
+    public void SetAgentInstance(int simID, float2 loc, float foodFitness, float sleepFitness, Genome.Allele action,
+        Genome genome) {
+        var pos = new Vector3((loc.x - 0.5f) * _scale.x + _offset.x, (loc.y - 0.5f) * _scale.y + _offset.y, -1);
+        if (simID == displaySimID) agent.transform.localPosition = pos;
+            agentDatas[simID] = new AgentData() { 
+            loc = loc,
+            foodFitness = foodFitness,
+            sleepFitness = sleepFitness,
+            genome = genome
+        };
+
+}
+    
+    public static void SetPatch(int simID, float2 loc, float foodArea, bool sleepArea ) {
+        inst.SetPatchInstance(simID, loc, foodArea, sleepArea );
+    }
+
+    public void SetPatchInstance(int simID, float2 loc, float foodArea, bool sleepArea) {
         if (sleepArea) {
-            SetSleep((int2) loc);
+            SetSleep(simID,(int2) loc);
         } else if(foodArea <= 0) {
-            SetFood((int2)loc);
+            SetFood(simID,(int2)loc);
         }
         else {
             SetClear((int2)loc);
         }
+        
+    }
+
+    [Serializable]
+    public struct AgentData {
+        public int simID;
+        public float2 loc;
+        public float foodFitness;
+        public float sleepFitness;
+        public Genome genome;
         
     }
 }
