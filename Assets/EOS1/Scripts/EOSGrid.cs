@@ -10,7 +10,6 @@ public class EOSGrid : MonoBehaviour {
     
     public Vector2Int size = new Vector2Int(10,10);
     public int levels = 2;
-    public int displaySimID = 0;
     public Transform holder;
     
     public GameObject prefabAgent;
@@ -31,6 +30,8 @@ public class EOSGrid : MonoBehaviour {
     public Material sleepMaterial;
     public Material foodEnergy;
     public Material sleepEnergy;
+    
+    public static int displaySimID = 0; // static so SetFood & SetSleep can be called in tests
     
     private static MeshRenderer[,] _meshRenderers;
     private static EOSGrid inst;
@@ -78,17 +79,18 @@ public class EOSGrid : MonoBehaviour {
     }
 
     public static void SetFood(int simdID, int2 loc) {
-        if (simdID == inst.displaySimID) {
+        if (simdID == displaySimID) {
             _meshRenderers[loc.x, loc.y].enabled = true;
             _meshRenderers[loc.x, loc.y].material = inst.foodMaterial;
         }
     }
     
     public static void SetSleep(int simID,int2 loc) {
-        if (simID == inst.displaySimID) {
+        if (simID == displaySimID) {
             _meshRenderers[loc.x, loc.y].enabled = true;
             _meshRenderers[loc.x, loc.y].material = inst.sleepMaterial;
         }
+        
     }
 
     public static void SetClear(int2 loc) { 

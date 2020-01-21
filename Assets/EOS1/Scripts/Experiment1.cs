@@ -88,6 +88,7 @@ public class Experiment1 {
         var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
         foreach (var c in coords) {
             var patch =patches[c.x, c.y,simID];
+            patchExists[c.x, c.y, simID] = true;
             em.SetComponentData(patch, new FoodArea(){Value = aRandom.NextInt(minFood,maxFood)}); 
             EOSGrid.SetFood(simID,c);
         }
@@ -97,11 +98,11 @@ public class Experiment1 {
         var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
         foreach (var c in coords) {
             var patch =patches[c.x, c.y,simID];
-            em.SetComponentData(patch, new SleepArea(){Value = true}); 
+            patchExists[c.x, c.y, simID] = true;
+            em.SetComponentData(patch, new SleepArea(){Value = true});
             EOSGrid.SetSleep(simID,c);
         }
     }
-
     
     public void DisplayTest(int2 size) {
         gridSize = size;
@@ -121,7 +122,6 @@ public class Experiment1 {
             em.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
             em.SetComponentData(agent, new Action() {Value = Genome.Allele.Eat});
         }
-        
     }
 
     public Genome RandomGenome(Random aRandom) {

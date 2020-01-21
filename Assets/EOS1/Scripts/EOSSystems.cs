@@ -205,15 +205,16 @@ public class ExecuteActionSystem : JobComponentSystem {
     
 }
 
-/*
+[UpdateAfter(typeof(ExecuteActionSystem))]
 [AlwaysSynchronizeSystem]
 [BurstCompile]
-public class SetPatch2System : JobComponentSystem {
+public class SetPatchNoPatchSystem : JobComponentSystem {
     EntityQuery m_Group;
     protected EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
     protected override void OnCreate() {
         base.OnCreate();
-        m_Group = GetEntityQuery(ComponentType.ReadWrite<Genome>(),
+        m_Group = GetEntityQuery(
+            ComponentType.ReadOnly<NoPatchFlag>(),
             ComponentType.ReadWrite<Patch>(),
             ComponentType.ReadOnly<PosXY>(),
             ComponentType.ReadOnly<SimID>()
@@ -225,13 +226,8 @@ public class SetPatch2System : JobComponentSystem {
     
     struct SetPatchJob : IJobForEachWithEntity<Patch,PosXY,SimID> {
 
-        [ReadOnly]public ComponentDataFromEntity<SleepArea> sleepAreaLookup;
-        [ReadOnly]public ComponentDataFromEntity<FoodArea> foodAreaLookup;
-        
         public EntityCommandBuffer.Concurrent ecb;
 
-        public float incrMultiplier;
-        public float turnAngle;
         public void Execute(Entity entity, int entityInQueryIndex, ref Patch patch, [ReadOnly] ref PosXY posXY,
             [ReadOnly]ref SimID simID) {
             var patchExist = Experiment1.patchExists[(int) posXY.Value.x, (int) posXY.Value.y, simID.Value];
@@ -239,15 +235,7 @@ public class SetPatch2System : JobComponentSystem {
             if (patchExist) {
                 patch = new Patch()
                     {Value = Experiment1.patches[(int) posXY.Value.x, (int) posXY.Value.y, simID.Value]};
-            }
-            // if (patchExist && Has NOPatch Flag
-            // remove flag
-            
-            //if (!patchExist && !Has NOPatch Flag)
-            // add no patch flag
-
-            if (true) {
-                ecb.AddComponent(entityInQueryIndex,patch.Value,new AdjustFoodArea(){Value = -1});
+                ecb.RemoveComponent<NoPatchFlag>(entityInQueryIndex,entity);
             }
         }
     }
@@ -265,7 +253,57 @@ public class SetPatch2System : JobComponentSystem {
     
 }
 
-*/
+
+[UpdateAfter(typeof(ExecuteActionSystem))]
+[AlwaysSynchronizeSystem]
+[BurstCompile]
+public class SetPatchNoPatchNoneSystem : JobComponentSystem {
+    EntityQuery m_Group;
+    protected EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
+    protected override void OnCreate() {
+        base.OnCreate();
+        m_Group = GetEntityQuery(
+            ComponentType.Exclude<NoPatchFlag>(),
+            ComponentType.ReadWrite<Patch>(),
+            ComponentType.ReadOnly<PosXY>(),
+            ComponentType.ReadOnly<SimID>()
+        );
+        m_EndSimulationEcbSystem = World
+            .GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+    }
+    
+    
+    struct SetPatchJob : IJobForEachWithEntity<Patch,PosXY,SimID> {
+        public EntityCommandBuffer.Concurrent ecb;
+        public void Execute(Entity entity, int entityInQueryIndex, ref Patch patch, [ReadOnly] ref PosXY posXY,
+            [ReadOnly]ref SimID simID) {
+            var patchExist = Experiment1.patchExists[(int) posXY.Value.x, (int) posXY.Value.y, simID.Value];
+
+            if (patchExist) {
+                patch = new Patch()
+                    {Value = Experiment1.patches[(int) posXY.Value.x, (int) posXY.Value.y, simID.Value]};
+                ecb.RemoveComponent<NoPatchFlag>(entityInQueryIndex,entity);
+            }
+            else {
+                ecb.AddComponent(entityInQueryIndex,entity, new NoPatchFlag());
+            }
+        }
+    }
+
+    protected override JobHandle OnUpdate(JobHandle inputDependencies) {
+
+        var ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().ToConcurrent();
+        var job = new SetPatchJob() {
+            ecb = ecb,
+        }; 
+        var jobHandle = job.Schedule(m_Group, inputDependencies);
+        m_EndSimulationEcbSystem.AddJobHandleForProducer(jobHandle);
+        return jobHandle;
+    }
+    
+}
+
+
 
 /// <summary>
 /// SetPatchSystem
@@ -288,12 +326,6 @@ public class SetPatchSystem : JobComponentSystem {
     struct SetPatchJob : IJobForEach<Patch,PosXY,SimID> {
 
         public void Execute(ref Patch patch, [ReadOnly] ref PosXY posXY, [ReadOnly]ref SimID simID) {
-            if (Experiment1.patchExists[(int) posXY.Value.x, (int) posXY.Value.y, simID.Value]) {
-                
-            }
-            else {
-                
-            }
             patch = new Patch(){Value = Experiment1.patches[(int)posXY.Value.x,(int)posXY.Value.y,simID.Value]};
         }
     }
