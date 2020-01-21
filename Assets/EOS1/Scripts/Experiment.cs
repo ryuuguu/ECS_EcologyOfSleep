@@ -18,7 +18,9 @@ public class Experiment {
     public static int hour; //0~23
     public static int day; //0~6
     protected static Entity[,,] patches;
-
+    protected static Dictionary<int3,Entity> patchDict = new Dictionary<int3, Entity>();
+    public static Entity emptyPatch;
+    public static Entity sleepPatch;
 
 
     public float speed;
@@ -32,7 +34,12 @@ public class Experiment {
     private Entity agent;
 
     public static Entity GetPatchAt(int x, int y, int simID) {
+        
         return patches[x, y, simID];
+    }
+    
+    public static void SetPatchAt(int x, int y, int simID, Entity patch) {
+        patches[x, y, simID]=  patch;
     }
     
     public static void NextTick() {
@@ -91,7 +98,7 @@ public class Experiment {
         var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
         foreach (var c in coords) {
             var patch = em.CreateEntity();
-            patches[c.x, c.y, simID] = patch;
+            SetPatchAt(c.x, c.y, simID, patch);
             
             em.AddComponentData(patch, new FoodArea(){Value = aRandom.NextInt(minFood,maxFood)}); 
             em.AddComponentData(patch, new SleepArea(){Value = false}); 
@@ -105,7 +112,7 @@ public class Experiment {
         em.AddComponentData(patch, new SleepArea(){Value = true});
         em.AddComponentData(patch, new FoodArea(){Value = 0}); 
         foreach (var c in coords) {
-            patches[c.x, c.y, simID] = patch;
+            SetPatchAt(c.x, c.y, simID, sleepPatch);
             
             EOSGrid.SetSleep(simID,c);
         }
@@ -140,25 +147,6 @@ public class Experiment {
         return result;
     }
     
-    public void Test() {
-        hour = 0;
-        turnAngleRadian = math.PI / 2f; //90º
-        incrMultiplier = 3;
-        var go = new GameObject("ExperimentSetting");
-        em  = World.DefaultGameObjectInjectionWorld.EntityManager;
-        SetRandomSeed(1);
-        SetupPatches(0,3, 3);
-        agent = SetupAgent(new float2(1.5f, 1.5f),1);
-        var centerPatch =patches[1, 1,0];
-        em.SetComponentData(centerPatch, new FoodArea(){Value = 2});
-        em.SetComponentData(agent, new Facing(){Value = 0, random = new Random(1)});
-        em.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
-        
-        var agentPatch = em.GetComponentData<Patch>(agent).Value;
-       
-        Debug.Log(em.HasComponent<AdjustFoodArea>(centerPatch));
-    }
-    
     /// <summary>
     /// Set master Random seed
     /// 0 is changed to 1
@@ -170,10 +158,10 @@ public class Experiment {
     }
 
     public void SetupPatches(int levels,int x, int y) {
-        var emptyPatch =   em.CreateEntity();
+        emptyPatch =   em.CreateEntity();
         em.AddComponentData(emptyPatch, new SleepArea() {Value = false});
         em.AddComponentData(emptyPatch, new FoodArea() {Value = 0});
-        var sleepPatch = em.CreateEntity();
+        sleepPatch = em.CreateEntity();
         em.AddComponentData(sleepPatch, new SleepArea() {Value = true});
         em.AddComponentData(sleepPatch, new FoodArea() {Value = 0});
         
@@ -182,7 +170,7 @@ public class Experiment {
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 for (int k = 0; k < levels; k++) {
-                    patches[i, j, k] = emptyPatch;
+                    SetPatchAt(i, j, k, emptyPatch);
                 }
             }
         }
@@ -197,7 +185,7 @@ public class Experiment {
         em.AddComponentData(agent, new SleepEnergy() {Value = 0});
         var x = (int) math.floor(startXY.x); 
         var y = (int) math.floor(startXY.y);
-        em.AddComponentData(agent, new Patch() {Value = patches[x, y,simID]});
+        em.AddComponentData(agent, new Patch() {Value = GetPatchAt(x, y,simID)});
         em.AddComponentData(agent, new Speed() {Value = speed});
         uint seed = random.NextUInt();
         seed = seed == 0 ? 1: seed ;
