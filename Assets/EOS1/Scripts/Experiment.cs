@@ -34,12 +34,19 @@ public class Experiment {
     private Entity agent;
 
     public static Entity GetPatchAt(int x, int y, int simID) {
-        
-        return patches[x, y, simID];
+        var key = new int3(x, y, simID);
+        if (patchDict.ContainsKey(key)) {
+            return patchDict[key];
+        }
+
+        return emptyPatch;
+        //return patches[x, y, simID];
     }
     
-    public static void SetPatchAt(int x, int y, int simID, Entity patch) {
-        patches[x, y, simID]=  patch;
+    public static void SetPatchAt(int x, int y, int simID, Entity patch, bool emptyPatch= false, bool foodPatch = false) {
+        if (emptyPatch) return;
+        patchDict[new int3(x, y, simID)] = patch;
+        //patches[x, y, simID]=  patch;
     }
     
     public static void NextTick() {
@@ -94,12 +101,12 @@ public class Experiment {
         return result;
     }
 
-    public void FoodCluster(int simID, int2 aGridSize, float2 center, float radius, int quantity, int minFood, int maxFood, Random aRandom) {
+    public void FoodCluster(int simID, int2 aGridSize, float2 center, float radius, int quantity, int minFood,
+        int maxFood, Random aRandom) {
         var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
         foreach (var c in coords) {
             var patch = em.CreateEntity();
             SetPatchAt(c.x, c.y, simID, patch);
-            
             em.AddComponentData(patch, new FoodArea(){Value = aRandom.NextInt(minFood,maxFood)}); 
             em.AddComponentData(patch, new SleepArea(){Value = false}); 
             EOSGrid.SetFood(simID,c);
@@ -108,12 +115,8 @@ public class Experiment {
     
     public void SleepCluster(int simID,int2 aGridSize, float2 center, float radius, int quantity, Random aRandom) {
         var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
-        var patch = em.CreateEntity();
-        em.AddComponentData(patch, new SleepArea(){Value = true});
-        em.AddComponentData(patch, new FoodArea(){Value = 0}); 
         foreach (var c in coords) {
             SetPatchAt(c.x, c.y, simID, sleepPatch);
-            
             EOSGrid.SetSleep(simID,c);
         }
     }
@@ -165,7 +168,7 @@ public class Experiment {
         em.AddComponentData(sleepPatch, new SleepArea() {Value = true});
         em.AddComponentData(sleepPatch, new FoodArea() {Value = 0});
         
-        patches = new Entity[x, y,levels];
+        //patches = new Entity[x, y,levels];
         
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
