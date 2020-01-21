@@ -21,6 +21,7 @@ public class Experiment {
     protected static Dictionary<int3,Entity> patchDict = new Dictionary<int3, Entity>();
     public static Entity emptyPatch;
     public static Entity sleepPatch;
+    public static List<Entity> unusedFoodAreas = new List<Entity>();
 
 
     public float speed;
@@ -105,12 +106,25 @@ public class Experiment {
         int maxFood, Random aRandom) {
         var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
         foreach (var c in coords) {
-            var patch = em.CreateEntity();
+            var patch = GetFoodPatch();
             SetPatchAt(c.x, c.y, simID, patch);
-            em.AddComponentData(patch, new FoodArea(){Value = aRandom.NextInt(minFood,maxFood)}); 
-            em.AddComponentData(patch, new SleepArea(){Value = false}); 
+            em.SetComponentData(patch, new FoodArea(){Value = aRandom.NextInt(minFood,maxFood)});
             EOSGrid.SetFood(simID,c);
         }
+    }
+
+    public Entity GetFoodPatch() {
+        if (unusedFoodAreas.Count > 0) {
+            var temp =  unusedFoodAreas[unusedFoodAreas.Count - 1];
+            unusedFoodAreas.RemoveAt(unusedFoodAreas.Count-1);
+            return temp;
+        }
+
+        var newPatch = em.CreateEntity();
+        em.AddComponentData(newPatch, new FoodArea(){Value =0}); 
+        em.AddComponentData(newPatch, new SleepArea(){Value = false});
+        return newPatch;
+
     }
     
     public void SleepCluster(int simID,int2 aGridSize, float2 center, float radius, int quantity, Random aRandom) {
