@@ -51,11 +51,13 @@ public class EOSGrid : MonoBehaviour {
     public void Update() {
         Experiment.NextTick();
         if (Experiment.minute == 0 && Experiment.hour == 0 && Experiment.day == 7) {
+            Debug.Log("Tick " + Experiment.day + " : " + Experiment.hour + " : " + Experiment.minute );
             foreach (var ag in agentDatas) {
                 Debug.Log("Loc " + ag.loc + " : " + ag.foodFitness + " : " + ag.sleepFitness + " : " + ag.genome);
             }
         }
         if (Experiment.minute == 1 && Experiment.hour == 0) {
+            Debug.Log("Tick " + Experiment.day + " : " + Experiment.hour + " : " + Experiment.minute );
             var ag = agentDatas[0];
             Debug.Log("Loc " + ag.loc + " : " + ag.foodFitness + " : " + ag.sleepFitness + " : " + ag.genome);
         }

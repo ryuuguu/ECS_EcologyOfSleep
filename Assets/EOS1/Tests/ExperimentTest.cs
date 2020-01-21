@@ -38,21 +38,21 @@ namespace Tests {
 
         [Test]
         public void FoodCluster_R1Test() {
-            Assert.AreEqual(false,Experiment.patchExists[0,0,0], "Start Empty [0,0,0]");
-            Assert.AreEqual(false,Experiment.patchExists[0,1,0], "Start Empty [0,1,0]");
+            Assert.AreEqual(0,m_Manager.GetComponentData<FoodArea>(Experiment.patches[0,0,0]).Value, "Start Empty [0,0,0]");
+            Assert.AreEqual(0,m_Manager.GetComponentData<FoodArea>(Experiment.patches[0,1,0]).Value, "Start Empty [0,1,0]");
             experiment.FoodCluster(0, new int2(3, 3), new float2(0, 0), 1, 1, 1, 1, new Random(1));
-            Assert.AreEqual(true,Experiment.patchExists[0,0,0], "After cluster [0,0,0]");
-            Assert.AreEqual(false,Experiment.patchExists[0,1,0], "After cluster [0,1,0]"); 
+            Assert.AreNotEqual(0,m_Manager.GetComponentData<FoodArea>(Experiment.patches[0,0,0]).Value, "After cluster [0,0,0]");
+            Assert.AreEqual(0,m_Manager.GetComponentData<FoodArea>(Experiment.patches[0,1,0]).Value, "After cluster [0,1,0]"); 
            
         }
         
         [Test]
         public void SleepCluster_R1Test() {
-            Assert.AreEqual(false,Experiment.patchExists[2,2,0], "Start Empty [2,2,0]");
-            Assert.AreEqual(false,Experiment.patchExists[0,1,0], "Start Empty [0,1,0]");
+            Assert.AreEqual(false,m_Manager.GetComponentData<SleepArea>(Experiment.patches[2,2,0]).Value, "Start Empty [2,2,0]");
+            Assert.AreEqual(false,m_Manager.GetComponentData<SleepArea>(Experiment.patches[0,1,0]).Value, "Start Empty [0,1,0]");
             experiment.SleepCluster(0, new int2(3, 3), new float2(2, 2), 1, 1, new Random(1));
-            Assert.AreEqual(true,Experiment.patchExists[2,2,0], "After cluster [2,2,0]");
-            Assert.AreEqual(false,Experiment.patchExists[0,1,0], "After cluster [0,1,0]"); 
+            Assert.AreEqual(true,m_Manager.GetComponentData<SleepArea>(Experiment.patches[2,2,0]).Value, "After cluster [2,2,0]");
+            Assert.AreEqual(false,m_Manager.GetComponentData<SleepArea>(Experiment.patches[0,1,0]).Value, "After cluster [0,1,0]"); 
            
         }
     }

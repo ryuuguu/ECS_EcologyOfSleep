@@ -18,7 +18,7 @@ public class Experiment {
     public static int hour; //0~23
     public static int day; //0~6
     public static Entity[,,] patches;
-    public static bool[,,] patchExists;
+    //public static bool[,,] patchExists;
 
     
 
@@ -89,7 +89,7 @@ public class Experiment {
         foreach (var c in coords) {
             var patch = em.CreateEntity();
             patches[c.x, c.y, simID] = patch;
-            patchExists[c.x, c.y, simID] = true;
+            
             em.AddComponentData(patch, new FoodArea(){Value = aRandom.NextInt(minFood,maxFood)}); 
             em.AddComponentData(patch, new SleepArea(){Value = false}); 
             EOSGrid.SetFood(simID,c);
@@ -103,7 +103,7 @@ public class Experiment {
         em.AddComponentData(patch, new FoodArea(){Value = 0}); 
         foreach (var c in coords) {
             patches[c.x, c.y, simID] = patch;
-            patchExists[c.x, c.y, simID] = true;
+            
             EOSGrid.SetSleep(simID,c);
         }
     }
@@ -175,18 +175,11 @@ public class Experiment {
         em.AddComponentData(sleepPatch, new FoodArea() {Value = 0});
         
         patches = new Entity[x, y,levels];
-        patchExists =  new bool[x, y,levels];
+        
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 for (int k = 0; k < levels; k++) {
-                    /*
-                    var patch = em.CreateEntity();
-                    
-                    em.AddComponentData(patch, new SleepArea() {Value = false});
-                    em.AddComponentData(patch, new FoodArea() {Value = 0});
-                    */
                     patches[i, j, k] = emptyPatch;
-                    patchExists[i, j, k] = false;
                 }
             }
         }
