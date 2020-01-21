@@ -7,7 +7,7 @@ using Unity.Mathematics;
 using Random = Unity.Mathematics.Random;
 
 
-public class Experiment1 {
+public class Experiment {
 
     public static int levels = 2;
     public static int2 gridSize;
@@ -87,7 +87,6 @@ public class Experiment1 {
     public void FoodCluster(int simID, int2 aGridSize, float2 center, float radius, int quantity, int minFood, int maxFood, Random aRandom) {
         var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
         foreach (var c in coords) {
-            //var patch =patches[c.x, c.y,simID];
             var patch = em.CreateEntity();
             patches[c.x, c.y, simID] = patch;
             patchExists[c.x, c.y, simID] = true;
@@ -99,13 +98,12 @@ public class Experiment1 {
     
     public void SleepCluster(int simID,int2 aGridSize, float2 center, float radius, int quantity, Random aRandom) {
         var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
+        var patch = em.CreateEntity();
+        em.AddComponentData(patch, new SleepArea(){Value = true});
+        em.AddComponentData(patch, new FoodArea(){Value = 0}); 
         foreach (var c in coords) {
-            //var patch =patches[c.x, c.y,simID];
-            var patch = em.CreateEntity();
             patches[c.x, c.y, simID] = patch;
             patchExists[c.x, c.y, simID] = true;
-            em.AddComponentData(patch, new SleepArea(){Value = true});
-            em.AddComponentData(patch, new FoodArea(){Value = 0}); 
             EOSGrid.SetSleep(simID,c);
         }
     }

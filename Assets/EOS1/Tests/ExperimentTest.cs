@@ -16,13 +16,13 @@ namespace Tests {
     public class ExperimentTest : ECSTestsFixture {
 
         protected Entity agent;
-        protected Experiment1 experiment;
+        protected Experiment experiment;
 
         [SetUp]
         public override void Setup() {
             base.Setup();
             EOSGrid.displaySimID = 1; // !=0 so EOSGrid instance methods will not be called
-            experiment = new Experiment1();
+            experiment = new Experiment();
             experiment.em = m_Manager;
             experiment.SetRandomSeed(1);
             experiment.SetupPatches(1, 3, 3);
@@ -38,21 +38,21 @@ namespace Tests {
 
         [Test]
         public void FoodCluster_R1Test() {
-            Assert.AreEqual(false,Experiment1.patchExists[0,0,0], "Start Empty [0,0,0]");
-            Assert.AreEqual(false,Experiment1.patchExists[0,1,0], "Start Empty [0,1,0]");
+            Assert.AreEqual(false,Experiment.patchExists[0,0,0], "Start Empty [0,0,0]");
+            Assert.AreEqual(false,Experiment.patchExists[0,1,0], "Start Empty [0,1,0]");
             experiment.FoodCluster(0, new int2(3, 3), new float2(0, 0), 1, 1, 1, 1, new Random(1));
-            Assert.AreEqual(true,Experiment1.patchExists[0,0,0], "After cluster [0,0,0]");
-            Assert.AreEqual(false,Experiment1.patchExists[0,1,0], "After cluster [0,1,0]"); 
+            Assert.AreEqual(true,Experiment.patchExists[0,0,0], "After cluster [0,0,0]");
+            Assert.AreEqual(false,Experiment.patchExists[0,1,0], "After cluster [0,1,0]"); 
            
         }
         
         [Test]
         public void SleepCluster_R1Test() {
-            Assert.AreEqual(false,Experiment1.patchExists[2,2,0], "Start Empty [2,2,0]");
-            Assert.AreEqual(false,Experiment1.patchExists[0,1,0], "Start Empty [0,1,0]");
+            Assert.AreEqual(false,Experiment.patchExists[2,2,0], "Start Empty [2,2,0]");
+            Assert.AreEqual(false,Experiment.patchExists[0,1,0], "Start Empty [0,1,0]");
             experiment.SleepCluster(0, new int2(3, 3), new float2(2, 2), 1, 1, new Random(1));
-            Assert.AreEqual(true,Experiment1.patchExists[2,2,0], "After cluster [2,2,0]");
-            Assert.AreEqual(false,Experiment1.patchExists[0,1,0], "After cluster [0,1,0]"); 
+            Assert.AreEqual(true,Experiment.patchExists[2,2,0], "After cluster [2,2,0]");
+            Assert.AreEqual(false,Experiment.patchExists[0,1,0], "After cluster [0,1,0]"); 
            
         }
     }

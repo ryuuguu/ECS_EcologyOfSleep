@@ -6,7 +6,7 @@ using Unity.Mathematics;
 
 public class EOSGrid : MonoBehaviour {
 
-    public Experiment1 experiment;
+    public Experiment experiment;
     
     public Vector2Int size = new Vector2Int(10,10);
     public int levels = 2;
@@ -37,9 +37,9 @@ public class EOSGrid : MonoBehaviour {
     private static EOSGrid inst;
 
     public void Start() {
-        experiment = new Experiment1();
-        Experiment1.levels = levels;
-        agentDatas = new AgentData[Experiment1.levels];
+        experiment = new Experiment();
+        Experiment.levels = levels;
+        agentDatas = new AgentData[Experiment.levels];
         inst = this;
         InitDisplay();
         agent = prefabAgent;
@@ -49,13 +49,13 @@ public class EOSGrid : MonoBehaviour {
     }
 
     public void Update() {
-        Experiment1.NextTick();
-        if (Experiment1.minute == 0 && Experiment1.hour == 0 && Experiment1.day == 7) {
+        Experiment.NextTick();
+        if (Experiment.minute == 0 && Experiment.hour == 0 && Experiment.day == 7) {
             foreach (var ag in agentDatas) {
                 Debug.Log("Loc " + ag.loc + " : " + ag.foodFitness + " : " + ag.sleepFitness + " : " + ag.genome);
             }
         }
-        if (Experiment1.minute == 1 && Experiment1.hour == 0) {
+        if (Experiment.minute == 1 && Experiment.hour == 0) {
             var ag = agentDatas[0];
             Debug.Log("Loc " + ag.loc + " : " + ag.foodFitness + " : " + ag.sleepFitness + " : " + ag.genome);
         }

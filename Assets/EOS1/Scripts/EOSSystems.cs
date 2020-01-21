@@ -99,7 +99,7 @@ public class SetActionSystem : JobComponentSystem {
     protected override JobHandle OnUpdate(JobHandle inputDependencies) {
         
         var job = new SetActionJob() {
-            hour = Experiment1.hour
+            hour = Experiment.hour
         };
         return job.Schedule(m_Group, inputDependencies);
     }
@@ -195,8 +195,8 @@ public class ExecuteActionSystem : JobComponentSystem {
            sleepAreaLookup = sleepAreas,
            foodAreaLookup = foodAreas,
            ecb = ecb,
-           incrMultiplier = Experiment1.incrMultiplier,
-           turnAngle = Experiment1.turnAngleRadian
+           incrMultiplier = Experiment.incrMultiplier,
+           turnAngle = Experiment.turnAngleRadian
         }; 
         var jobHandle = job.Schedule(m_Group, inputDependencies);
         m_EndSimulationEcbSystem.AddJobHandleForProducer(jobHandle);
@@ -227,7 +227,7 @@ public class SetPatchSystem : JobComponentSystem {
     struct SetPatchJob : IJobForEach<Patch,PosXY,SimID> {
 
         public void Execute(ref Patch patch, [ReadOnly] ref PosXY posXY, [ReadOnly]ref SimID simID) {
-            patch = new Patch(){Value = Experiment1.patches[(int)posXY.Value.x,(int)posXY.Value.y,simID.Value]};
+            patch = new Patch(){Value = Experiment.patches[(int)posXY.Value.x,(int)posXY.Value.y,simID.Value]};
         }
     }
 

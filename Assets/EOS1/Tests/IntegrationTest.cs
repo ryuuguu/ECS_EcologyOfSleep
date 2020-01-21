@@ -17,7 +17,7 @@ namespace Tests {
     public class ItegrationTest : ECSTestsFixture {
 
         protected Entity agent;
-        protected Experiment1 experiment;
+        protected Experiment experiment;
         
         /// <summary>
         ///
@@ -35,10 +35,10 @@ namespace Tests {
         [SetUp]
         public override void Setup() {
             base.Setup();
-            Experiment1.hour = 0;
-            Experiment1.turnAngleRadian = math.PI / 2f; //90º
-            Experiment1.incrMultiplier = 3;
-            experiment = new Experiment1();
+            Experiment.hour = 0;
+            Experiment.turnAngleRadian = math.PI / 2f; //90º
+            Experiment.incrMultiplier = 3;
+            experiment = new Experiment();
             experiment.em = m_Manager;
             experiment.SetRandomSeed(1);
             experiment.SetupPatches(1,3, 3);
@@ -59,8 +59,8 @@ namespace Tests {
         [Test]
         public void ThreeTickFoodTest() {
             // set up eat as first  actions and test for correct results 
-            var centerPatch = Experiment1.patches[1, 1,0];
-            Experiment1.turnAngleRadian = 0; // always want to move straight for test.
+            var centerPatch = Experiment.patches[1, 1,0];
+            Experiment.turnAngleRadian = 0; // always want to move straight for test.
             m_Manager.SetComponentData(centerPatch, new FoodArea(){Value = 2});
             m_Manager.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
             m_Manager.SetComponentData(agent, new Action(){Value = Genome.Allele.Eat});
@@ -81,7 +81,7 @@ namespace Tests {
             Assert.AreEqual(2, m_Manager.GetComponentData<FoodArea>(centerPatch).Value,"FoodArea Tick 0 pre");
             // adjustFood added
             endSimulationEcbSystem.Update();
-            Experiment1.NextTick();
+            Experiment.NextTick();
             
             Assert.AreEqual(-1, m_Manager.GetComponentData<AdjustFoodArea>(centerPatch).Value,"AdjustFoodArea Tick 0 post");
             Assert.IsTrue( m_Manager.HasComponent<AdjustFoodArea>(centerPatch),"Tick 0 post");
@@ -104,7 +104,7 @@ namespace Tests {
          
             // adjust food added & adjustfood removed
             endSimulationEcbSystem.Update();
-            Experiment1.NextTick();
+            Experiment.NextTick();
             
             Assert.IsTrue( m_Manager.HasComponent<AdjustFoodArea>(centerPatch),"Tick 1 post");
             
@@ -114,12 +114,12 @@ namespace Tests {
             World.CreateSystem<ExecuteActionSystem>().Update();
             World.CreateSystem<SetPatchSystem>().Update();
             Assert.IsTrue( m_Manager.HasComponent<AdjustFoodArea>(centerPatch),"Tick 2 pre");
-            Assert.AreEqual(Experiment1.patches[2, 1,0],m_Manager.GetComponentData<Patch>(agent).Value);
+            Assert.AreEqual(Experiment.patches[2, 1,0],m_Manager.GetComponentData<Patch>(agent).Value);
             Assert.AreEqual(new float2(2.5f, 1.5f), m_Manager.GetComponentData<PosXY>(agent).Value,"PosXY");
             
             // adjust food adjustFood removed
             endSimulationEcbSystem.Update();
-            Experiment1.NextTick();
+            Experiment.NextTick();
             
             Assert.IsFalse( m_Manager.HasComponent<AdjustFoodArea>(centerPatch),"Tick 2 post");
             
