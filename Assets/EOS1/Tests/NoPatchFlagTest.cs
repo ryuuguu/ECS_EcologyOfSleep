@@ -41,15 +41,18 @@ namespace Tests {
         public void SetPatchNoPatchSystem_EmptyTest() {
             m_Manager.AddComponentData(agent, new NoPatchFlag());
             World.CreateSystem<SetPatchNoPatchSystem>().Update();
+            World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>().Update();
             var hasNoPatchFlag = m_Manager.HasComponent<NoPatchFlag>(agent);
             Assert.AreEqual(true, hasNoPatchFlag, "Empty NoPatchFlag");
         }
         
         [Test]
         public void SetPatchNoPatchSystem_FoodTest() {
+            Assert.AreEqual(true,Experiment1.patchExists[0,0,0], "Food patch [0,0,0]");
             agent = experiment.SetupAgent(new float2(0.5f, 0.5f),0);
             m_Manager.AddComponentData(agent, new NoPatchFlag());
             World.CreateSystem<SetPatchNoPatchSystem>().Update();
+            World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>().Update();
             var hasNoPatchFlag = m_Manager.HasComponent<NoPatchFlag>(agent);
             Assert.AreEqual(false,hasNoPatchFlag,"Food NoPatchFlag");
         }
@@ -59,6 +62,7 @@ namespace Tests {
             agent = experiment.SetupAgent(new float2(2.5f, 2.5f),0);
             m_Manager.AddComponentData(agent, new NoPatchFlag());
             World.CreateSystem<SetPatchNoPatchSystem>().Update();
+            World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>().Update();
             var hasNoPatchFlag = m_Manager.HasComponent<NoPatchFlag>(agent);
             Assert.AreEqual(false,hasNoPatchFlag,"Sleep NoPatchFlag");
         }
@@ -69,17 +73,20 @@ namespace Tests {
             Assert.AreEqual(false,hasNoPatchFlag,"Initial NoPatchFlag");
             
             World.CreateSystem<SetPatchNoPatchNoneSystem>().Update();
+            World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>().Update();
             hasNoPatchFlag = m_Manager.HasComponent<NoPatchFlag>(agent);
             Assert.AreEqual(true,hasNoPatchFlag,"Empty NoPatchFlag");
             
             m_Manager.RemoveComponent<NoPatchFlag>(agent);
             World.CreateSystem<SetPatchNoPatchNoneSystem>().Update();
+            World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>().Update();
             agent = experiment.SetupAgent(new float2(0.5f, 0.5f),0);
             hasNoPatchFlag = m_Manager.HasComponent<NoPatchFlag>(agent);
             Assert.AreEqual(false,hasNoPatchFlag,"Food NoPatchFlag");
             
             
             World.CreateSystem<SetPatchNoPatchNoneSystem>().Update();
+            World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>().Update();
             agent = experiment.SetupAgent(new float2(2.5f, 2.5f),0);
             hasNoPatchFlag = m_Manager.HasComponent<NoPatchFlag>(agent);
             Assert.AreEqual(false,hasNoPatchFlag,"Sleep NoPatchFlag");
