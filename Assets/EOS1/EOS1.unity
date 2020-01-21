@@ -500,8 +500,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   size: {x: 40, y: 40}
-  levels: 1
-  displaySimID: 0
+  levels: 2
   holder: {fileID: 293954020}
   prefabAgent: {fileID: 1063813221}
   prefabMesh: {fileID: 9178653641751187751, guid: 82d831f6aec8b4d8ab245d2ef4031e5d,

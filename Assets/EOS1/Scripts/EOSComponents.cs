@@ -44,9 +44,6 @@ public struct Patch : IComponentData {
     public Entity Value;
 }
 
-//flag to mark agents on cell with no patch values
-public struct NoPatchFlag : IComponentData{}
-
 public struct AdjustFoodArea : IComponentData {
     public float Value;
 }

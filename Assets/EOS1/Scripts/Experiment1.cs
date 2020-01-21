@@ -87,9 +87,12 @@ public class Experiment1 {
     public void FoodCluster(int simID, int2 aGridSize, float2 center, float radius, int quantity, int minFood, int maxFood, Random aRandom) {
         var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
         foreach (var c in coords) {
-            var patch =patches[c.x, c.y,simID];
+            //var patch =patches[c.x, c.y,simID];
+            var patch = em.CreateEntity();
+            patches[c.x, c.y, simID] = patch;
             patchExists[c.x, c.y, simID] = true;
-            em.SetComponentData(patch, new FoodArea(){Value = aRandom.NextInt(minFood,maxFood)}); 
+            em.AddComponentData(patch, new FoodArea(){Value = aRandom.NextInt(minFood,maxFood)}); 
+            em.AddComponentData(patch, new SleepArea(){Value = false}); 
             EOSGrid.SetFood(simID,c);
         }
     }
@@ -97,9 +100,12 @@ public class Experiment1 {
     public void SleepCluster(int simID,int2 aGridSize, float2 center, float radius, int quantity, Random aRandom) {
         var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
         foreach (var c in coords) {
-            var patch =patches[c.x, c.y,simID];
+            //var patch =patches[c.x, c.y,simID];
+            var patch = em.CreateEntity();
+            patches[c.x, c.y, simID] = patch;
             patchExists[c.x, c.y, simID] = true;
-            em.SetComponentData(patch, new SleepArea(){Value = true});
+            em.AddComponentData(patch, new SleepArea(){Value = true});
+            em.AddComponentData(patch, new FoodArea(){Value = 0}); 
             EOSGrid.SetSleep(simID,c);
         }
     }
@@ -162,17 +168,26 @@ public class Experiment1 {
         random = new  Random(seed);
     }
 
-    public void SetupPatches(int levels,int x, int y ) {
+    public void SetupPatches(int levels,int x, int y) {
+        var emptyPatch =   em.CreateEntity();
+        em.AddComponentData(emptyPatch, new SleepArea() {Value = false});
+        em.AddComponentData(emptyPatch, new FoodArea() {Value = 0});
+        var sleepPatch = em.CreateEntity();
+        em.AddComponentData(sleepPatch, new SleepArea() {Value = true});
+        em.AddComponentData(sleepPatch, new FoodArea() {Value = 0});
+        
         patches = new Entity[x, y,levels];
         patchExists =  new bool[x, y,levels];
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 for (int k = 0; k < levels; k++) {
+                    /*
                     var patch = em.CreateEntity();
-                    em.AddComponentData(patch, new PosXY() {Value = new float2(i, j)});
+                    
                     em.AddComponentData(patch, new SleepArea() {Value = false});
                     em.AddComponentData(patch, new FoodArea() {Value = 0});
-                    patches[i, j, k] = patch;
+                    */
+                    patches[i, j, k] = emptyPatch;
                     patchExists[i, j, k] = false;
                 }
             }
