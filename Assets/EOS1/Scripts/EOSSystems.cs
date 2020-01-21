@@ -227,7 +227,7 @@ public class SetPatchSystem : JobComponentSystem {
     struct SetPatchJob : IJobForEach<Patch,PosXY,SimID> {
 
         public void Execute(ref Patch patch, [ReadOnly] ref PosXY posXY, [ReadOnly]ref SimID simID) {
-            patch = new Patch(){Value = Experiment.patches[(int)posXY.Value.x,(int)posXY.Value.y,simID.Value]};
+            patch = new Patch(){Value = Experiment.GetPatchAt((int)posXY.Value.x,(int)posXY.Value.y,simID.Value)};
         }
     }
 

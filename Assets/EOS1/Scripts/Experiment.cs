@@ -17,10 +17,9 @@ public class Experiment {
     public static int minute; //0~59
     public static int hour; //0~23
     public static int day; //0~6
-    public static Entity[,,] patches;
-    //public static bool[,,] patchExists;
+    protected static Entity[,,] patches;
 
-    
+
 
     public float speed;
     public static float incrMultiplier = 3;
@@ -31,6 +30,10 @@ public class Experiment {
     public EntityManager em;
 
     private Entity agent;
+
+    public static Entity GetPatchAt(int x, int y, int simID) {
+        return patches[x, y, simID];
+    }
     
     public static void NextTick() {
         minute++;
