@@ -56,10 +56,12 @@ public class EOSGrid : MonoBehaviour {
                 Debug.Log("Loc " + ag.loc + " : " + ag.foodFitness + " : " + ag.sleepFitness + " : " + ag.genome);
             }
         }
-        if (Experiment.minute == 1 && Experiment.hour == 0) {
+        if (Experiment.minute == 0 && Experiment.hour == 1) {
             Debug.Log("Tick " + Experiment.day + " : " + Experiment.hour + " : " + Experiment.minute );
             var ag = agentDatas[0];
             Debug.Log("Loc " + ag.loc + " : " + ag.foodFitness + " : " + ag.sleepFitness + " : " + ag.genome);
+            experiment.NextGeneration();
+            Experiment.hour = 0;
         }
     }
     

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -21,9 +22,9 @@ public class Experiment {
     protected static Dictionary<int3,Entity> patchDict = new Dictionary<int3, Entity>();
     public static Entity emptyPatch;
     public static Entity sleepPatch;
-    protected static List<Entity> unusedFoodAreas = new List<Entity>();
-    public List<Entity> agents;
-    protected List<Entity> unusedAgents = new List<Entity>();
+    public static List<Entity> unusedFoodAreas = new List<Entity>();
+    public List<Entity> agents = new List<Entity>();
+    public List<Entity> unusedAgents = new List<Entity>();
     
 
     public float speed;
@@ -44,10 +45,15 @@ public class Experiment {
         return emptyPatch;
     }
     
-    public static void SetPatchAt(int x, int y, int simID, Entity patch, bool emptyPatch= false, bool foodPatch = false) {
+    public static void SetPatchAt(int x, int y, int simID, Entity patch, bool emptyPatch= false) {
         if (emptyPatch) return;
         patchDict[new int3(x, y, simID)] = patch;
     }
+
+    public static void ClearPatches() {
+        patchDict.Clear();
+    }
+    
     
     public static void NextTick() {
         minute++;
@@ -154,23 +160,42 @@ public class Experiment {
         incrMultiplier = 3;
         SetRandomSeed(1);
 
-        DisplayStartGeneration(size);
+        DisplayStartGeneration();
     }
     
-    public void DisplayStartGeneration(int2 size) {
+    public void DisplayStartGeneration() {
         
         for (int simID = 0; simID < levels; simID++) {
             SetupPatches(levels, gridSize.x, gridSize.y);
             var agent = SetupAgent(new float2(1.5f, 1.5f), simID);
             em.SetComponentData(agent, RandomGenome(new Random(random.NextUInt())));
-            var foodCenter = ((float2) size) * 0.8f;
+            var foodCenter = ((float2) gridSize) * 0.8f;
             FoodCluster(simID, gridSize, foodCenter, 10, 40, 15, 200, new Random(random.NextUInt()));
-            var sleepCenter = ((float2) size) * 0.2f;
+            var sleepCenter = ((float2) gridSize) * 0.2f;
             SleepCluster(simID, gridSize, sleepCenter, 10, 40, new Random(random.NextUInt()));
             em.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
         }
     }
+    
+    public void NextGeneration() {
+        ClearGeneration();
+        DisplayStartGeneration();
+    }
 
+    public void ClearGeneration() {
+        unusedFoodAreas.AddRange(patchDict.Values);
+        foreach (var e in unusedFoodAreas.ToList()) {
+            if (em.GetComponentData<SleepArea>(e).Value) {
+                unusedFoodAreas.Remove(e);
+            }
+        }
+
+        ClearPatches();
+        unusedAgents.AddRange(agents);
+        agents.Clear();
+        Debug.Log("ClearGeneration()  unusedAgents.Count " +unusedAgents.Count);
+    }
+    
     public Genome RandomGenome(Random aRandom) {
         var result = new Genome();
         for (int i = 0; i < 24; i++) {
@@ -218,13 +243,16 @@ public class Experiment {
 
     public Entity GetNewAgent() {
         if (unusedAgents.Count > 0) {
-            var recycledAgent =  unusedFoodAreas[unusedAgents.Count - 1];
+            var recycledAgent =  unusedAgents[unusedAgents.Count - 1];
             unusedAgents.RemoveAt(unusedAgents.Count-1);
             em.SetComponentData(recycledAgent, new FoodEnergy(){Value = 0});
             em.SetComponentData(recycledAgent, new SleepEnergy(){Value = 0});
             em.SetComponentData(recycledAgent, new Speed() {Value = speed});
             em.SetComponentData(recycledAgent, new Facing() {Value = 0, random = new Random(1)});
             em.SetComponentData(recycledAgent, new Action() {Value = Genome.Allele.Eat});
+            agents.Add(recycledAgent);
+            Debug.Log("recycledAgent unusedAgents.Count " +unusedAgents.Count);
+            Debug.Log("recycledAgent agents.Count " +agents.Count);
             return recycledAgent;
         }
 
@@ -242,15 +270,9 @@ public class Experiment {
         em.AddComponentData(newAgent, new Action() {Value = Genome.Allele.Eat});
         em.AddComponentData(newAgent, new Genome()); 
          
+        agents.Add(newAgent);
+        Debug.Log("newAgent agents.Count " +agents.Count);
         return newAgent;
     }
     
-    public void NextGeneration() {
-        ClearGeneration();
-    }
-
-    public void ClearGeneration() {
-        // recycle foodAreas 
-        // recycle agents 
-    }
 }
