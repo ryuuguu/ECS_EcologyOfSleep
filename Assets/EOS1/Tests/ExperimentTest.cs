@@ -21,9 +21,9 @@ namespace Tests {
         [SetUp]
         public override void Setup() {
             base.Setup();
+            Experiment.StaticSetup(m_Manager);
             EOSGrid.displaySimID = 1; // !=0 so EOSGrid instance methods will not be called
             experiment = new Experiment();
-            experiment.em = m_Manager;
             experiment.SetRandomSeed(1);
             experiment.SetupPatches(1, 3, 3);
             //agent = experiment.SetupAgent(new float2(1.5f, 1.5f), 0);

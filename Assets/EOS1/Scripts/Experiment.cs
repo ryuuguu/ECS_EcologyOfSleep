@@ -32,7 +32,7 @@ public class Experiment {
     public static Random random; // This Random will set seeds for all other Randoms used
     
     [NonSerialized]
-    public EntityManager em;
+    public static EntityManager em;
     
     
     
@@ -105,14 +105,14 @@ public class Experiment {
         int maxFood, Random aRandom) {
         var coords = Cluster(aGridSize, center, radius, quantity, aRandom);
         foreach (var c in coords) {
-            var patch = GetFoodPatch();
+            var patch = GetNewFoodPatch();
             SetPatchAt(c.x, c.y, simID, patch);
             em.SetComponentData(patch, new FoodArea(){Value = aRandom.NextInt(minFood,maxFood)});
             EOSGrid.SetFood(simID,c);
         }
     }
 
-    public Entity GetFoodPatch() {
+    public Entity GetNewFoodPatch() {
         if (unusedFoodAreas.Count > 0) {
             var temp =  unusedFoodAreas[unusedFoodAreas.Count - 1];
             unusedFoodAreas.RemoveAt(unusedFoodAreas.Count-1);
@@ -133,14 +133,32 @@ public class Experiment {
             EOSGrid.SetSleep(simID,c);
         }
     }
-    
+
+    public static void StaticSetup(EntityManager anEm) {
+        em = anEm;
+        turnAngleRadian = math.PI / 12f; //15º
+        incrMultiplier = 3;
+        emptyPatch =   em.CreateEntity();
+        em.AddComponentData(emptyPatch, new SleepArea() {Value = false});
+        em.AddComponentData(emptyPatch, new FoodArea() {Value = 0});
+        sleepPatch = em.CreateEntity();
+        em.AddComponentData(sleepPatch, new SleepArea() {Value = true});
+        em.AddComponentData(sleepPatch, new FoodArea() {Value = 0});
+    }
+
     public void DisplayTest(int2 size) {
+        StaticSetup(World.DefaultGameObjectInjectionWorld.EntityManager);
         gridSize = size;
         hour = 0;
         turnAngleRadian = math.PI / 12f; //15º
         incrMultiplier = 3;
-        em  = World.DefaultGameObjectInjectionWorld.EntityManager;
         SetRandomSeed(1);
+
+        DisplayStartGeneration(size);
+    }
+    
+    public void DisplayStartGeneration(int2 size) {
+        
         for (int simID = 0; simID < levels; simID++) {
             SetupPatches(levels, gridSize.x, gridSize.y);
             var agent = SetupAgent(new float2(1.5f, 1.5f), simID);
@@ -150,7 +168,6 @@ public class Experiment {
             var sleepCenter = ((float2) size) * 0.2f;
             SleepCluster(simID, gridSize, sleepCenter, 10, 40, new Random(random.NextUInt()));
             em.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
-            em.SetComponentData(agent, new Action() {Value = Genome.Allele.Eat});
         }
     }
 
@@ -174,13 +191,6 @@ public class Experiment {
     }
 
     public void SetupPatches(int levels,int x, int y) {
-        emptyPatch =   em.CreateEntity();
-        em.AddComponentData(emptyPatch, new SleepArea() {Value = false});
-        em.AddComponentData(emptyPatch, new FoodArea() {Value = 0});
-        sleepPatch = em.CreateEntity();
-        em.AddComponentData(sleepPatch, new SleepArea() {Value = true});
-        em.AddComponentData(sleepPatch, new FoodArea() {Value = 0});
-        
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 for (int k = 0; k < levels; k++) {
@@ -198,7 +208,6 @@ public class Experiment {
         var x = (int) math.floor(startXY.x); 
         var y = (int) math.floor(startXY.y);
         em.SetComponentData(agent, new Patch() {Value = GetPatchAt(x, y,simID)});
-        
         var chooseGenome = new Genome();
         for(int i= 0; i<24;i++) {
             chooseGenome[i] = Genome.Allele.Choose;
@@ -215,7 +224,7 @@ public class Experiment {
             em.SetComponentData(recycledAgent, new SleepEnergy(){Value = 0});
             em.SetComponentData(recycledAgent, new Speed() {Value = speed});
             em.SetComponentData(recycledAgent, new Facing() {Value = 0, random = new Random(1)});
-            em.SetComponentData(recycledAgent, new Action());
+            em.SetComponentData(recycledAgent, new Action() {Value = Genome.Allele.Eat});
             return recycledAgent;
         }
 
@@ -228,9 +237,9 @@ public class Experiment {
         em.AddComponentData(newAgent, new Patch() {Value = GetPatchAt(-1, -1,-1)}); // this will always be an empty patch
         em.AddComponentData(newAgent, new Speed() {Value = speed});
         uint seed = random.NextUInt();
-        seed = seed == 0 ? 1: seed ;
-        em.AddComponentData(newAgent, new Facing() {Value = 0, random = new Random(1)});
-        em.AddComponentData(newAgent, new Action());
+        //seed = seed == 0 ? 1: seed ;
+        em.AddComponentData(newAgent, new Facing() {Value = 0, random = new Random(seed)});
+        em.AddComponentData(newAgent, new Action() {Value = Genome.Allele.Eat});
         em.AddComponentData(newAgent, new Genome()); 
          
         return newAgent;

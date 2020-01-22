@@ -37,11 +37,11 @@ namespace Tests {
         [SetUp]
         public override void Setup() {
             base.Setup();
+            Experiment.StaticSetup(m_Manager);
             Experiment.hour = 0;
             Experiment.turnAngleRadian = math.PI / 2f; //90º
             Experiment.incrMultiplier = 3;
             experiment = new Experiment();
-            experiment.em = m_Manager;
             experiment.SetRandomSeed(1);
             experiment.SetupPatches(1,3, 3);
             agent = experiment.SetupAgent(new float2(1.5f, 1.5f),0);
