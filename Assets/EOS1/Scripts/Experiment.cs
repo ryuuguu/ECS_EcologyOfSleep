@@ -7,17 +7,18 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Random = Unity.Mathematics.Random;
 
-
+[Serializable]
 public class Experiment {
 
     public static int levels = 2;
     public static int2 gridSize;
     public static int minuteMod = 60;
     public static int hourMod = 24;
-
     public static int minute; //0~59
     public static int hour; //0~23
     public static int day; //0~6
+    public static int numberOfOffspring = 5;
+    public static float mutateChance;
     protected static Entity[,,] patches;
     protected static Dictionary<int3,Entity> patchDict = new Dictionary<int3, Entity>();
     public static Entity emptyPatch;
@@ -25,6 +26,7 @@ public class Experiment {
     public static List<Entity> unusedFoodAreas = new List<Entity>();
     public List<Entity> agents = new List<Entity>();
     public List<Entity> unusedAgents = new List<Entity>();
+    public List<AgentFitness> bestAgents = new List<AgentFitness>();
     
 
     public float speed;
@@ -164,24 +166,80 @@ public class Experiment {
     }
     
     public void DisplayStartGeneration() {
-        
+        /*
         for (int simID = 0; simID < levels; simID++) {
-            SetupPatches(levels, gridSize.x, gridSize.y);
             var agent = SetupAgent(new float2(1.5f, 1.5f), simID);
             em.SetComponentData(agent, RandomGenome(new Random(random.NextUInt())));
+            em.SetComponentData(agent, new Facing() {Value = 0, random = new Random(random.NextUInt())});
+        }
+        */
+        SetupAgents();
+        for (int simID = 0; simID < levels; simID++) {
+            SetupPatches(levels, gridSize.x, gridSize.y);
             var foodCenter = ((float2) gridSize) * 0.8f;
             FoodCluster(simID, gridSize, foodCenter, 10, 40, 15, 200, new Random(random.NextUInt()));
             var sleepCenter = ((float2) gridSize) * 0.2f;
             SleepCluster(simID, gridSize, sleepCenter, 10, 40, new Random(random.NextUInt()));
-            em.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
+            
         }
     }
-    
+
+    public void SetupAgents() {
+        int simID = 0;
+        foreach (var agf in bestAgents) {
+            for (int i = 0; i < numberOfOffspring; i++) {
+
+                var agent = SetupAgent(new float2(1.5f, 1.5f), simID);
+                var newGenome = new Genome();
+                for (int j = 0; j < 24; j++) {
+                    if (random.NextFloat(0, 1) < mutateChance) {
+                        newGenome[j] = (Genome.Allele) random.NextInt(0, 3);
+                    }
+                    else {
+                        newGenome[j] = agf.genome[j];
+                    }
+                }
+
+                em.SetComponentData(agent, newGenome);
+                em.SetComponentData(agent, new Facing() {Value = 0, random = new Random(random.NextUInt())});
+                simID++;
+                if (simID >= levels) goto Finished;
+            }
+        }
+        
+        for (; simID < levels; simID++) {
+            var agent = SetupAgent(new float2(1.5f, 1.5f), simID);
+            em.SetComponentData(agent, RandomGenome(new Random(random.NextUInt())));
+            em.SetComponentData(agent, new Facing() {Value = 0, random = new Random(1)});
+        }
+        
+        Finished:
+        return;
+    }
+
     public void NextGeneration() {
         ClearGeneration();
         DisplayStartGeneration();
     }
 
+    /// <summary>
+    /// Find Best
+    ///    fill bestAgents with current agents
+    ///   sorted by combined fitness.
+    /// </summary>
+    public void StoreBestAgents() {
+        bestAgents.Clear();
+        foreach (var agent in agents) {
+            var agf = new AgentFitness();
+            agf.genome = em.GetComponentData<Genome>(agent);
+            agf.fitness = FoodEnergy.Fitness(em.GetComponentData<FoodEnergy>(agent).Value);
+            agf.fitness += SleepEnergy.Fitness(em.GetComponentData<SleepEnergy>(agent).Value);
+            bestAgents.Add(agf);
+        }
+        bestAgents.Sort((a,b)=>b.fitness.CompareTo(a.fitness)); //high to low sort
+    }
+    
+    
     public void ClearGeneration() {
         unusedFoodAreas.AddRange(patchDict.Values);
         foreach (var e in unusedFoodAreas.ToList()) {
@@ -191,6 +249,8 @@ public class Experiment {
         }
 
         ClearPatches();
+
+        StoreBestAgents();
         unusedAgents.AddRange(agents);
         agents.Clear();
         Debug.Log("ClearGeneration()  unusedAgents.Count " +unusedAgents.Count);
@@ -274,5 +334,10 @@ public class Experiment {
         Debug.Log("newAgent agents.Count " +agents.Count);
         return newAgent;
     }
-    
+
+    [Serializable]
+    public struct AgentFitness {
+        public float fitness;
+        public Genome genome;
+    }
 }

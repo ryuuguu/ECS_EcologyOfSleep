@@ -499,6 +499,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91ac76191d9ed4f28af408d14f6c7821, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  experiment:
+    bestAgents: []
+    speed: 0
   size: {x: 40, y: 40}
   levels: 100
   holder: {fileID: 293954020}
