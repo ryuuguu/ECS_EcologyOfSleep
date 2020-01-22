@@ -60,6 +60,7 @@ public class EOSGrid : MonoBehaviour {
             Debug.Log("Tick " + Experiment.day + " : " + Experiment.hour + " : " + Experiment.minute );
             var ag = agentDatas[0];
             Debug.Log("Loc " + ag.loc + " : " + ag.foodFitness + " : " + ag.sleepFitness + " : " + ag.genome);
+            ClearDisplay();
             experiment.NextGeneration();
             Experiment.hour = 0;
         }
@@ -97,6 +98,14 @@ public class EOSGrid : MonoBehaviour {
         
     }
 
+
+    public  void  ClearDisplay() {
+        for (int i = 0; i < size.x; i++) {
+            for (int j = 0; j < size.y; j++) {
+                _meshRenderers[i,j].enabled = false;
+            }
+        }
+    }
     public static void SetClear(int2 loc) { 
         _meshRenderers[loc.x, loc.y].enabled = false;
     }
