@@ -19,6 +19,7 @@ public class Experiment {
     public static int day; //0~6
     public static int numberOfOffspring = 5;
     public static float mutateChance;
+    
     protected static Entity[,,] patches;
     protected static Dictionary<int3,Entity> patchDict = new Dictionary<int3, Entity>();
     public static Entity emptyPatch;
@@ -27,7 +28,7 @@ public class Experiment {
     public List<Entity> agents = new List<Entity>();
     public List<Entity> unusedAgents = new List<Entity>();
     public List<AgentFitness> bestAgents = new List<AgentFitness>();
-    
+    public int generationNumber =0;
 
     public float speed;
     public static float incrMultiplier = 3;
@@ -166,13 +167,7 @@ public class Experiment {
     }
     
     public void DisplayStartGeneration() {
-        /*
-        for (int simID = 0; simID < levels; simID++) {
-            var agent = SetupAgent(new float2(1.5f, 1.5f), simID);
-            em.SetComponentData(agent, RandomGenome(new Random(random.NextUInt())));
-            em.SetComponentData(agent, new Facing() {Value = 0, random = new Random(random.NextUInt())});
-        }
-        */
+        generationNumber++;
         SetupAgents();
         for (int simID = 0; simID < levels; simID++) {
             SetupPatches(levels, gridSize.x, gridSize.y);
@@ -311,8 +306,6 @@ public class Experiment {
             em.SetComponentData(recycledAgent, new Facing() {Value = 0, random = new Random(1)});
             em.SetComponentData(recycledAgent, new Action() {Value = Genome.Allele.Eat});
             agents.Add(recycledAgent);
-            Debug.Log("recycledAgent unusedAgents.Count " +unusedAgents.Count);
-            Debug.Log("recycledAgent agents.Count " +agents.Count);
             return recycledAgent;
         }
 
@@ -331,7 +324,6 @@ public class Experiment {
         em.AddComponentData(newAgent, new Genome()); 
          
         agents.Add(newAgent);
-        Debug.Log("newAgent agents.Count " +agents.Count);
         return newAgent;
     }
 
